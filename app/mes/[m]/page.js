@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { db } from '@/lib/supabase'
-import { brl, rotulo, dataBR, CONTAS, proximo, anterior } from '@/lib/fmt'
+import { brl, rotulo, curto, CONTAS, proximo, anterior } from '@/lib/fmt'
 import * as A from '@/app/actions'
 import { AutoForm } from '@/app/ui'
 
@@ -9,13 +9,17 @@ export default async function Mes({ params, searchParams }) {
   const { m } = await params, { f } = await searchParams
   if (!/^\d{4}-\d{2}$/.test(m)) notFound()
   const comp = `${m}-01`, sb = await db()
-  const [{ data: meses }, { data: r }, { data: lanc }, { data: ajustes }, { data: alunos }] = await Promise.all([
+  const [{ data: meses }, { data: r }, { data: lanc }, { data: ajustes }, { data: alunos }, { data: atrasos }] = await Promise.all([
     sb.from('meses').select('competencia').order('competencia'),
     sb.from('resumo_mes').select('*').eq('competencia', comp).maybeSingle(),
     sb.from('mensalidades').select('*, alunos(nome, turma)').eq('competencia', comp),
     sb.from('ajustes').select('*, alunos(nome)').eq('competencia', comp).order('id'),
     sb.from('alunos').select('id, nome').eq('ativo', true).order('nome'),
+    sb.from('mensalidades').select('aluno_id, competencia, valor_aluno').eq('status', 'pendente').lt('competencia', comp).order('competencia'),
   ])
+  // débitos de meses anteriores por aluno (alerta na lista)
+  const deve = {}
+  ;(atrasos || []).forEach((d) => { const x = (deve[d.aluno_id] ??= { meses: [], tot: 0 }); x.meses.push(curto(d.competencia.slice(0, 7))); x.tot += Number(d.valor_aluno) })
   const lista = (meses || []).map((x) => x.competencia.slice(0, 7))
   const ultimo = lista.at(-1)
   if (!r) {
@@ -64,7 +68,8 @@ export default async function Mes({ params, searchParams }) {
       <div className="list">
         {vis.map((x) => (
           <div className="row" key={x.id}>
-            <div className="who"><b>{x.alunos.nome}</b><small>Turma {x.alunos.turma}{Number(x.valor_aluno) !== Number(r.valor_aluno) ? ` · parcela ${brl(x.valor_aluno)}` : ''}</small></div>
+            <div className="who"><b>{x.alunos.nome}</b><small>Turma {x.alunos.turma}{Number(x.valor_aluno) !== Number(r.valor_aluno) ? ` · parcela ${brl(x.valor_aluno)}` : ''}</small>
+              {deve[x.aluno_id] && <small className="alerta">⚠ Deve {deve[x.aluno_id].meses.length === 1 ? '1 mês anterior' : `${deve[x.aluno_id].meses.length} meses anteriores`} · {brl(deve[x.aluno_id].tot)} ({deve[x.aluno_id].meses.join(', ')})</small>}</div>
             <div className="seg" role="group" aria-label={`Situação de ${x.alunos.nome}`}>
               {['pago', 'pendente', 'isento'].map((s) => (
                 <form key={s} action={A.setStatus}>

@@ -27,6 +27,7 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 | R10 | **Saldo do mês** = Recebido − A receber (≤ 0). **Saldo do ano** = Σ saldos dos meses do ano. |
 | R11 | **Débitos em aberto por pessoa** = Σ competências `pendente` no período filtrado: um mês, um ano (padrão: o ano selecionado) ou todos os anos. Um período não penaliza o outro. Pendências antigas migram como `pendente` e não há cobrança ativa; não existe status de "perdoado". |
 | R12 | **Abrir mês**: cria uma mensalidade `pendente` para cada aluno ativo. Aluno entra/sai da turma ativando/desativando no cadastro; meses já abertos não mudam. |
+| R14 | **Alerta na visão do mês:** cada aluno com competências anteriores `pendente` mostra quantos meses deve, o total e quais meses. É só informativo. |
 | R13 | Valor da parcela é guardado na própria mensalidade (permite meia mensalidade, ex. jan/25). |
 
 ## 4. Relatório mensal (PDF)

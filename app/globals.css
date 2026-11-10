@@ -47,6 +47,7 @@ h2{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute
 .row:first-child{border-top:0}
 .who{min-width:0}.who b{font-weight:600}
 .who small{display:block;color:var(--muted);font-size:12px}
+.who small.alerta{color:var(--warn);font-weight:600}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
 .seg button{border:0;background:var(--surface);padding:8px 11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
 .seg form,.chips form{display:contents}
