@@ -1,0 +1,216 @@
+<title>Aulas de Canto IMCM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: barra de marca + abas; cada aba é uma tela do app real (mobile-first, coluna única até 900px) */
+:root{--bg:#EEECE7;--surface:#FFFFFF;--ink:#161616;--muted:#6B6A66;--line:#DDDAD3;--navy:#0C1E3C;--red:#E1251B;
+--ok:#1E7A4C;--ok-bg:#E3F2EA;--warn:#A85A00;--warn-bg:#FCEFD9;--ex:#4A5A75;--ex-bg:#E6EAF1;--bad:#B3261E;
+--font:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111214;--surface:#1B1C1F;--ink:#EDECE8;--muted:#9C9A94;--line:#2E2F33;--navy:#9FB6DD;--red:#FF4B3E;
+--ok:#5FD39A;--ok-bg:#163126;--warn:#F2B35B;--warn-bg:#36280F;--ex:#A9B8D3;--ex-bg:#222A38;--bad:#FF7A70;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111214;--surface:#1B1C1F;--ink:#EDECE8;--muted:#9C9A94;--line:#2E2F33;--navy:#9FB6DD;--red:#FF4B3E;
+--ok:#5FD39A;--ok-bg:#163126;--warn:#F2B35B;--warn-bg:#36280F;--ex:#A9B8D3;--ex-bg:#222A38;--bad:#FF7A70;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:18px 10px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-size:22px;font-weight:800;letter-spacing:-.03em}
+.brand b i{color:var(--red);font-style:normal}
+.brand span{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.proto{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--red);border:1px solid var(--red);border-radius:99px;padding:3px 10px}
+nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:20px}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button[aria-current="true"]{color:var(--ink);border-color:var(--red)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.mpick{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.mpick button{border:0;background:none;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px}
+.mpick button:hover{background:var(--bg)}
+.mpick strong{min-width:130px;text-align:center;font-size:16px;text-transform:capitalize}
+h2{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:28px 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kpi{background:var(--surface);padding:14px 16px}
+.kpi small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.kpi strong{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+.kpi em{font-style:normal;font-size:12px;color:var(--muted)}
+.neg{color:var(--bad)}.pos{color:var(--ok)}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:14px 0 4px;display:flex}
+.progress i{display:block;background:var(--ok)}
+.progress i+i{background:var(--ex)}
+.legend{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.legend b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:0}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.who{min-width:0}
+.who b{font-weight:600}
+.who small{display:block;color:var(--muted);font-size:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:7px 11px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on.pago{background:var(--ok-bg);color:var(--ok)}
+.seg button.on.pendente{background:var(--warn-bg);color:var(--warn)}
+.seg button.on.isento{background:var(--ex-bg);color:var(--ex)}
+.detail{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer}
+.chip.on{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.chip.flag{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+input,select{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.filters{display:flex;gap:6px;margin-left:auto}
+.grid-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:7px 10px;text-align:left;font-size:13px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td.num,th.num{text-align:right}
+.cell{display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;text-align:center;line-height:22px;font-size:11px;font-weight:700}
+.c-pago{background:var(--ok-bg);color:var(--ok)}.c-pendente{background:var(--warn-bg);color:var(--warn)}.c-isento{background:var(--ex-bg);color:var(--ex)}.c-x{background:transparent;color:var(--line)}
+.chart{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:150px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 14px 0}
+.col{display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.col i{display:block;background:var(--ok);border-radius:3px 3px 0 0}
+.col i.p{background:var(--warn);border-radius:3px 3px 0 0}
+.col i.p+i{border-radius:0}
+.col span{font-size:10px;color:var(--muted);text-align:center;padding:4px 0 8px;text-transform:capitalize}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.note{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)}
+.paper{background:#fff;color:#161616;max-width:760px;margin:0 auto;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.12);padding:40px 44px}
+.paper h3{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:#6B6A66;margin:26px 0 8px}
+.paper table td,.paper table th{border-color:#E5E2DC;color:#161616}
+.paper .tag{font-size:11px;font-weight:700;color:#A85A00}
+.ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #161616;padding-bottom:12px;gap:12px;flex-wrap:wrap}
+.ph b{font-size:22px;font-weight:800;letter-spacing:-.03em}.ph b i{color:#E1251B;font-style:normal}
+@media (max-width:600px){.paper{padding:24px 18px}}
+.qa{display:grid;gap:10px}
+.qa div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.qa b{display:block;margin-bottom:2px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+<div class="wrap">
+<header><div class="brand"><b>m<i>.</i> Aulas de Canto</b><span>Louvor IMCM</span></div><span class="proto">Protótipo</span></header>
+<nav><button data-t="mes">Mês</button><button data-t="ano">Ano</button><button data-t="alunos">Alunos</button><button data-t="relatorio">Relatório</button><button data-t="migracao">Migração</button></nav>
+<main id="app"></main></div><div class="toast" id="toast" role="status"></div>
+<script>
+const SEED={"alunos":[{"id":0,"nome":"Adriana Zotelli","apelidos":["Adriana Z."],"turma":2,"ativo":true},{"id":1,"nome":"Alana","apelidos":[],"turma":1,"ativo":false},{"id":2,"nome":"Ana Guidelli","apelidos":[],"turma":1,"ativo":false},{"id":3,"nome":"Ana Sara Campos","apelidos":["Ana Sara"],"turma":1,"ativo":true},{"id":4,"nome":"Carla","apelidos":[],"turma":1,"ativo":false},{"id":5,"nome":"Carol Piovezan","apelidos":["Carol"],"turma":1,"ativo":true},{"id":6,"nome":"Danielle Rodrigues","apelidos":[],"turma":2,"ativo":false},{"id":7,"nome":"Ecleacy Bueno","apelidos":[],"turma":1,"ativo":true},{"id":8,"nome":"Elisângela","apelidos":[],"turma":2,"ativo":true},{"id":9,"nome":"Gabriella Ferri","apelidos":[],"turma":2,"ativo":false},{"id":10,"nome":"Julia","apelidos":[],"turma":1,"ativo":false},{"id":11,"nome":"Kamilla Valério","apelidos":["Kamilla"],"turma":1,"ativo":true},{"id":12,"nome":"Lara Badan","apelidos":["Lara"],"turma":1,"ativo":true},{"id":13,"nome":"Laura Sanches","apelidos":[],"turma":2,"ativo":false},{"id":14,"nome":"Leandro Valério","apelidos":["Leandro"],"turma":1,"ativo":true},{"id":15,"nome":"Luciana Coutinho","apelidos":["Luciana"],"turma":1,"ativo":false},{"id":16,"nome":"Luiz Eduardo Coutinho","apelidos":["Luiz Coutinho"],"turma":1,"ativo":true},{"id":17,"nome":"Luiz Eduardo Feitosa","apelidos":["Edu"],"turma":1,"ativo":true},{"id":18,"nome":"Mayara Pavan","apelidos":["May"],"turma":1,"ativo":true},{"id":19,"nome":"Mel","apelidos":[],"turma":1,"ativo":false},{"id":20,"nome":"Natielle Villa Nova","apelidos":["Nati"],"turma":1,"ativo":true},{"id":21,"nome":"Nayara Raquel","apelidos":["Nay"],"turma":2,"ativo":true},{"id":22,"nome":"Newton Gama","apelidos":[],"turma":2,"ativo":true},{"id":23,"nome":"Nicoly","apelidos":[],"turma":1,"ativo":false},{"id":24,"nome":"Rodrigo","apelidos":[],"turma":1,"ativo":false},{"id":25,"nome":"Rosilene Queiroz","apelidos":[],"turma":2,"ativo":false},{"id":26,"nome":"Silinha","apelidos":[],"turma":1,"ativo":false},{"id":27,"nome":"Wilson Bokorny","apelidos":["Wilson"],"turma":1,"ativo":true}],"lanc":[["2024-03",1,"pago",null],["2024-03",2,"pago",null],["2024-03",4,"pago",null],["2024-03",17,"pago",null],["2024-03",11,"pago",null],["2024-03",18,"pago",null],["2024-03",19,"pago",null],["2024-03",21,"pago",null],["2024-03",26,"pago",null],["2024-04",1,"pago",null],["2024-04",2,"pago",null],["2024-04",3,"pago",null],["2024-04",4,"pago",null],["2024-04",17,"pago",null],["2024-04",10,"pago",null],["2024-04",11,"pago",null],["2024-04",14,"pago",null],["2024-04",18,"pago",null],["2024-04",19,"pago",null],["2024-04",21,"pago",null],["2024-04",24,"pago",null],["2024-04",26,"pago",null],["2024-05",1,"pago",null],["2024-05",2,"pago",null],["2024-05",3,"pago",null],["2024-05",4,"pago",null],["2024-05",17,"pago",null],["2024-05",10,"pago",null],["2024-05",11,"pago",null],["2024-05",14,"pago",null],["2024-05",16,"pago",null],["2024-05",18,"pago",null],["2024-05",19,"pago",null],["2024-05",21,"pago",null],["2024-05",23,"pago",null],["2024-05",26,"pago",null],["2024-06",1,"pago",null],["2024-06",2,"pago",null],["2024-06",3,"pago",null],["2024-06",15,"pago",null],["2024-06",17,"pago",null],["2024-06",10,"pago",null],["2024-06",11,"pago",null],["2024-06",14,"pago",null],["2024-06",16,"pago",null],["2024-06",18,"pago",null],["2024-06",19,"pago",null],["2024-06",21,"pago",null],["2024-06",26,"pago",null],["2024-07",1,"pago",null],["2024-07",2,"pago",null],["2024-07",3,"pago",null],["2024-07",15,"pago",null],["2024-07",17,"pago",null],["2024-07",10,"pago",null],["2024-07",11,"pago",null],["2024-07",14,"pago",null],["2024-07",16,"pago",null],["2024-07",18,"pago",null],["2024-07",19,"pago",null],["2024-07",21,"pago",null],["2024-07",26,"pago",null],["2024-08",2,"pago",null],["2024-08",3,"pago",null],["2024-08",15,"pago",null],["2024-08",17,"pago",null],["2024-08",10,"pago",null],["2024-08",11,"pago",null],["2024-08",14,"pago",null],["2024-08",16,"pago",null],["2024-08",18,"pago",null],["2024-08",19,"pago",null],["2024-08",21,"pago",null],["2024-08",26,"pago",null],["2024-09",2,"pago",null],["2024-09",3,"pago",null],["2024-09",17,"pago",null],["2024-09",10,"pago",null],["2024-09",11,"pago",null],["2024-09",14,"pago",null],["2024-09",15,"pago",null],["2024-09",16,"pago",null],["2024-09",18,"pago",null],["2024-09",19,"pago",null],["2024-09",21,"pago",null],["2024-09",26,"pago",null],["2024-10",2,"pago",null],["2024-10",3,"pago",null],["2024-10",17,"pago",null],["2024-10",10,"pago",null],["2024-10",11,"pago",null],["2024-10",14,"pago",null],["2024-10",15,"pago",null],["2024-10",16,"pago",null],["2024-10",18,"pago",null],["2024-10",19,"pago",null],["2024-10",21,"pago",null],["2024-10",26,"pago",null],["2024-11",2,"pago",null],["2024-11",3,"pago",null],["2024-11",17,"pago",null],["2024-11",10,"pago",null],["2024-11",11,"pago",null],["2024-11",14,"pago",null],["2024-11",15,"pago",null],["2024-11",16,"pago",null],["2024-11",18,"pago",null],["2024-11",21,"pago",null],["2024-11",24,"pago",null],["2024-11",26,"pago",null],["2024-12",2,"pendente",null],["2024-12",3,"pago",null],["2024-12",17,"pago",null],["2024-12",10,"pago",null],["2024-12",11,"pago",null],["2024-12",14,"pago",null],["2024-12",15,"pago",null],["2024-12",16,"pago",null],["2024-12",18,"pendente",null],["2024-12",21,"pago",null],["2024-12",24,"pago",null],["2024-12",26,"pago",null],["2025-01",3,"pago",null],["2025-01",17,"pago",null],["2025-01",10,"pago",null],["2025-01",11,"pago",null],["2025-01",14,"pago",null],["2025-01",15,"pago",null],["2025-01",16,"pago",null],["2025-01",18,"pago",null],["2025-01",21,"pago",null],["2025-01",24,"pago",null],["2025-01",26,"pago",null],["2025-01",27,"pago",null],["2025-02",3,"pago",null],["2025-02",17,"pago",null],["2025-02",10,"pago",null],["2025-02",11,"pago",null],["2025-02",12,"pago",null],["2025-02",14,"pago",null],["2025-02",15,"pago",null],["2025-02",16,"pago",null],["2025-02",18,"pago",null],["2025-02",21,"pago",null],["2025-02",24,"pago",null],["2025-02",26,"pago",null],["2025-02",27,"pago",null],["2025-03",3,"pago",null],["2025-03",17,"pago",null],["2025-03",11,"pago",null],["2025-03",12,"pago",null],["2025-03",14,"pago",null],["2025-03",15,"pago",null],["2025-03",16,"pago",null],["2025-03",18,"pago",null],["2025-03",19,"pago",null],["2025-03",21,"pago",null],["2025-03",24,"pago",null],["2025-03",26,"pago",null],["2025-03",27,"pago",null],["2025-04",3,"pago",null],["2025-04",17,"pago",null],["2025-04",11,"pago",null],["2025-04",12,"pago",null],["2025-04",14,"pago",null],["2025-04",15,"pago",null],["2025-04",16,"pago",null],["2025-04",18,"pago",null],["2025-04",19,"pago",null],["2025-04",21,"pago",null],["2025-04",24,"pago",null],["2025-04",26,"pago",null],["2025-04",27,"pago",null],["2025-05",0,"pago",null],["2025-05",3,"pago",null],["2025-05",5,"pago",null],["2025-05",17,"pago",null],["2025-05",11,"pago",null],["2025-05",12,"pago",null],["2025-05",14,"pago",null],["2025-05",15,"pago",null],["2025-05",16,"pago",null],["2025-05",18,"pago",null],["2025-05",19,"pago",null],["2025-05",20,"pago",null],["2025-05",21,"pago",null],["2025-05",24,"pago",null],["2025-05",26,"pago",null],["2025-05",27,"pago",null],["2025-05",9,"isento",null],["2025-05",6,"pago",null],["2025-05",8,"pago",null],["2025-05",22,"pago",null],["2025-05",25,"pago",null],["2025-06",0,"pago",null],["2025-06",3,"pago",null],["2025-06",5,"pago",null],["2025-06",17,"pago",null],["2025-06",11,"pago",null],["2025-06",12,"pago",null],["2025-06",14,"pago",null],["2025-06",15,"pago",null],["2025-06",16,"pago",null],["2025-06",18,"pago",null],["2025-06",19,"pago",null],["2025-06",20,"pago",null],["2025-06",21,"pago",null],["2025-06",26,"pago",null],["2025-06",27,"pago",null],["2025-06",9,"isento",null],["2025-06",13,"pago",null],["2025-06",8,"pago",null],["2025-06",22,"pago",null],["2025-06",25,"pago",null],["2025-07",0,"pago",null],["2025-07",3,"pago",null],["2025-07",17,"pago",null],["2025-07",11,"pago",null],["2025-07",12,"pago",null],["2025-07",14,"pago",null],["2025-07",15,"pago",null],["2025-07",16,"pago",null],["2025-07",18,"pago",null],["2025-07",19,"pago",null],["2025-07",20,"pago",null],["2025-07",21,"pago",null],["2025-07",26,"pago",null],["2025-07",27,"pago",null],["2025-07",9,"isento",null],["2025-07",13,"pago",null],["2025-07",8,"pago",null],["2025-07",22,"pago",null],["2025-07",25,"isento",null],["2025-08",0,"pago",null],["2025-08",3,"pago",null],["2025-08",17,"pago",null],["2025-08",11,"pago",null],["2025-08",12,"pago",null],["2025-08",14,"pago",null],["2025-08",15,"pago",null],["2025-08",16,"pago",null],["2025-08",18,"pendente",null],["2025-08",19,"pago",null],["2025-08",20,"pago",null],["2025-08",21,"pago",null],["2025-08",26,"pago",null],["2025-08",27,"pago",null],["2025-08",9,"isento",null],["2025-08",13,"pago",null],["2025-08",8,"pago",null],["2025-08",22,"pago",null],["2025-09",0,"pago",null],["2025-09",3,"pago",null],["2025-09",17,"pago",null],["2025-09",11,"pago",null],["2025-09",12,"pago",null],["2025-09",14,"pago",null],["2025-09",15,"pago",null],["2025-09",16,"pago",null],["2025-09",18,"pendente",null],["2025-09",19,"pago",null],["2025-09",20,"pago",null],["2025-09",21,"pago",null],["2025-09",26,"pago",null],["2025-09",27,"pago",null],["2025-09",9,"isento",null],["2025-09",13,"pago",null],["2025-09",8,"pago",null],["2025-09",22,"pago",null],["2025-10",0,"isento",null],["2025-10",3,"pago",null],["2025-10",17,"pago",null],["2025-10",11,"pago",null],["2025-10",12,"pago",null],["2025-10",14,"pago",null],["2025-10",15,"pago",null],["2025-10",16,"pago",null],["2025-10",18,"pago",null],["2025-10",19,"pago",null],["2025-10",20,"pago",null],["2025-10",21,"pago",null],["2025-10",26,"pago",null],["2025-10",27,"pago",null],["2025-10",9,"isento",null],["2025-10",13,"pago",null],["2025-10",8,"pago",null],["2025-10",22,"isento",null],["2025-11",0,"pago",null],["2025-11",3,"pago",null],["2025-11",17,"pago",null],["2025-11",11,"pago",null],["2025-11",12,"pago",null],["2025-11",14,"pago",null],["2025-11",15,"pago",null],["2025-11",16,"pago",null],["2025-11",18,"pago",null],["2025-11",19,"isento",null],["2025-11",20,"pago",null],["2025-11",21,"pago",null],["2025-11",26,"pago",null],["2025-11",27,"pago",null],["2025-11",9,"isento",null],["2025-11",13,"pago",null],["2025-11",8,"pago",null],["2025-11",22,"pago",null],["2025-12",0,"pago",null],["2025-12",3,"pago",null],["2025-12",17,"pago",null],["2025-12",11,"pago",null],["2025-12",12,"pago",null],["2025-12",14,"pago",null],["2025-12",15,"pago",null],["2025-12",16,"pago",null],["2025-12",18,"isento",null],["2025-12",20,"pago",null],["2025-12",21,"pago",null],["2025-12",26,"pago",null],["2025-12",27,"pago",null],["2025-12",9,"isento",null],["2025-12",13,"pago",null],["2025-12",8,"pago",null],["2025-12",22,"pago",null],["2026-01",3,"pago",null],["2026-01",5,"pago",null],["2026-01",7,"pago",null],["2026-01",11,"pago",null],["2026-01",12,"pago",null],["2026-01",14,"pago",null],["2026-01",15,"pago",null],["2026-01",16,"pago",null],["2026-01",17,"pago",null],["2026-01",18,"pendente",null],["2026-01",20,"pago",null],["2026-01",27,"pago",null],["2026-01",21,"isento",null],["2026-01",0,"pago",null],["2026-01",8,"pago",null],["2026-01",9,"pendente",null],["2026-01",13,"pago",null],["2026-01",22,"pago",null],["2026-02",3,"pago",null],["2026-02",5,"pago",null],["2026-02",7,"pago",null],["2026-02",11,"pago",null],["2026-02",12,"pago",null],["2026-02",14,"pago",null],["2026-02",15,"pago",null],["2026-02",16,"pago",null],["2026-02",17,"pago",null],["2026-02",18,"pago",null],["2026-02",20,"pago",null],["2026-02",27,"pago",null],["2026-02",0,"pago",null],["2026-02",8,"pago",null],["2026-02",9,"pendente",null],["2026-02",13,"pendente",null],["2026-02",22,"pago",null],["2026-03",3,"pago",null],["2026-03",17,"pago",null],["2026-03",11,"pago",null],["2026-03",12,"pago",null],["2026-03",14,"pago",null],["2026-03",15,"pago",null],["2026-03",16,"pago",null],["2026-03",20,"pago",null],["2026-03",21,"pago",null],["2026-03",7,"pago",null],["2026-03",5,"pago",null],["2026-03",27,"pago",null],["2026-03",0,"pago",null],["2026-03",9,"isento",null],["2026-03",8,"pago",null],["2026-03",22,"pago",null],["2026-04",3,"pago",null],["2026-04",7,"pago",null],["2026-04",11,"pago",null],["2026-04",18,"pago",null],["2026-04",14,"pago",null],["2026-04",15,"pago",null],["2026-04",16,"pago",null],["2026-04",17,"pago",null],["2026-04",20,"pago",null],["2026-04",21,"pago",null],["2026-04",27,"pago",null],["2026-04",0,"pago",null],["2026-04",8,"pago",null],["2026-04",22,"pago",null],["2026-05",3,"pago","Bradesco"],["2026-05",7,"pago","PagSeguro"],["2026-05",11,"pago","PicPay"],["2026-05",18,"pendente",null],["2026-05",12,"pago","PagSeguro"],["2026-05",14,"pago","PagSeguro"],["2026-05",16,"pago","PagSeguro"],["2026-05",17,"pago","PagSeguro"],["2026-05",20,"pago","PagSeguro"],["2026-05",21,"pago","PicPay"],["2026-05",27,"pago","PagSeguro"],["2026-05",0,"pago","PagSeguro"],["2026-05",8,"pago","Bradesco"],["2026-05",22,"pago","PagSeguro"],["2026-06",3,"pago","Bradesco"],["2026-06",7,"pago","PagSeguro"],["2026-06",11,"pago","PicPay"],["2026-06",18,"pendente",null],["2026-06",12,"pago","PagSeguro"],["2026-06",14,"pago","PagSeguro"],["2026-06",16,"pago","PagSeguro"],["2026-06",17,"pago","PagSeguro"],["2026-06",20,"pago","PagSeguro"],["2026-06",21,"pago","PicPay"],["2026-06",27,"pago","PagSeguro"],["2026-06",0,"pago","PagSeguro"],["2026-06",8,"pago","PagSeguro"],["2026-06",22,"pago","PagSeguro"],["2026-07",3,"pago","PagSeguro"],["2026-07",5,"pago","PagSeguro"],["2026-07",7,"pago","PagSeguro"],["2026-07",11,"pago","PagSeguro"],["2026-07",18,"pendente",null],["2026-07",12,"pago","PagSeguro"],["2026-07",14,"pago","PagSeguro"],["2026-07",16,"pago","PagSeguro"],["2026-07",17,"pago","Bradesco"],["2026-07",20,"pago","PagSeguro"],["2026-07",27,"pago","PagSeguro"],["2026-07",21,"pago","PagSeguro"],["2026-07",0,"pago","Bradesco"],["2026-07",8,"pago","PagSeguro"],["2026-07",22,"pago","Bradesco"],["2026-08",3,"pago","PagSeguro"],["2026-08",5,"pago","PagSeguro"],["2026-08",7,"pago","PicPay"],["2026-08",11,"pago","PagSeguro"],["2026-08",18,"pendente",null],["2026-08",12,"pago","PagSeguro"],["2026-08",14,"pago","PagSeguro"],["2026-08",16,"pago","PagSeguro"],["2026-08",17,"pago","PagSeguro"],["2026-08",20,"pago","PagSeguro"],["2026-08",27,"pago","PagSeguro"],["2026-08",21,"pago","PagSeguro"],["2026-08",0,"pendente",null],["2026-08",8,"pago","PagSeguro"],["2026-08",22,"pendente",null],["2026-09",3,"pago","PagSeguro"],["2026-09",5,"pago","PagSeguro"],["2026-09",7,"pago","PicPay"],["2026-09",11,"pago","PagSeguro"],["2026-09",18,"pendente",null],["2026-09",12,"pendente",null],["2026-09",14,"pago","PagSeguro"],["2026-09",16,"pago","PagSeguro"],["2026-09",17,"pago","PagSeguro"],["2026-09",20,"pago","PagSeguro"],["2026-09",27,"pago","PagSeguro"],["2026-09",21,"pago","PagSeguro"],["2026-09",0,"pago","PagSeguro"],["2026-09",8,"pago","PagSeguro"],["2026-09",22,"pago","PagSeguro"],["2026-10",3,"pago","PagSeguro"],["2026-10",5,"pago","PagSeguro"],["2026-10",7,"pendente",null],["2026-10",11,"pendente",null],["2026-10",18,"pendente",null],["2026-10",12,"pendente",null],["2026-10",14,"pendente",null],["2026-10",16,"pago","PagSeguro"],["2026-10",17,"pago","PagSeguro"],["2026-10",20,"pago","PagSeguro"],["2026-10",27,"pendente",null],["2026-10",21,"pago","PagSeguro"],["2026-10",0,"pago","PagSeguro"],["2026-10",8,"pago","PagSeguro"],["2026-10",22,"pago","PagSeguro"],["2026-11",3,"pendente",null],["2026-11",5,"pendente",null],["2026-11",7,"pendente",null],["2026-11",11,"pendente",null],["2026-11",18,"pendente",null],["2026-11",12,"pendente",null],["2026-11",14,"pendente",null],["2026-11",16,"pendente",null],["2026-11",17,"pendente",null],["2026-11",20,"pendente",null],["2026-11",27,"pendente",null],["2026-11",21,"pago","PagSeguro"],["2026-11",0,"pago","PagSeguro"],["2026-11",8,"pago","PagSeguro"],["2026-11",22,"pago","PagSeguro"]],"params":{"2024-03":{"mens":null,"aluno":70},"2024-04":{"mens":null,"aluno":70},"2024-05":{"mens":null,"aluno":70},"2024-06":{"mens":null,"aluno":70},"2024-07":{"mens":null,"aluno":70},"2024-08":{"mens":null,"aluno":70},"2024-09":{"mens":null,"aluno":70},"2024-10":{"mens":null,"aluno":70},"2024-11":{"mens":null,"aluno":70},"2024-12":{"mens":null,"aluno":70},"2025-01":{"mens":null,"aluno":70},"2025-02":{"mens":null,"aluno":70},"2025-03":{"mens":null,"aluno":70},"2025-04":{"mens":null,"aluno":70},"2025-05":{"mens":null,"aluno":70},"2025-06":{"mens":130,"aluno":70},"2025-07":{"mens":140,"aluno":70},"2025-08":{"mens":140,"aluno":70},"2025-09":{"mens":140,"aluno":70},"2025-10":{"mens":140,"aluno":70},"2025-11":{"mens":140,"aluno":70},"2025-12":{"mens":140,"aluno":70},"2026-01":{"mens":140,"aluno":70},"2026-02":{"mens":140,"aluno":70},"2026-03":{"mens":140,"aluno":70},"2026-04":{"mens":140,"aluno":70},"2026-05":{"mens":140,"aluno":70},"2026-06":{"mens":140,"aluno":70},"2026-07":{"mens":140,"aluno":70},"2026-08":{"mens":140,"aluno":70},"2026-09":{"mens":140,"aluno":70},"2026-10":{"mens":140,"aluno":70},"2026-11":{"mens":140,"aluno":70}},"ajustes":[{"mes":"2026-05","valor":70,"desc":"Carol Piovezan — aula de abril/26 fora da lista","aluno":5},{"mes":"2026-06","valor":-140,"desc":"Luciana pagou 2x em maio","aluno":15}]};
+const D=SEED;const HOJE='2026-11-10';
+const MN=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MF=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const L=D.lanc.map(([mes,a,st,conta])=>({mes,a,st,conta:conta||null,valor:70,pago_em:null,motivo:''}));
+L.forEach(x=>{if(x.mes==='2026-11'&&x.st==='pago')x.pago_em='2026-11-05'});
+const A=D.alunos;const P=D.params;const AJ=D.ajustes;
+let tab='mes',mes='2026-11',ano='2026',filtro='todos';
+const brl=v=>v==null?'—':(v<0?'−':'')+'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const lbl=m=>{const[y,mm]=m.split('-');return MF[+mm-1]+' '+y};
+const short=m=>{const[y,mm]=m.split('-');return MN[+mm-1]+'/'+y.slice(2)};
+const meses=()=>Object.keys(P).sort();
+const doMes=m=>L.filter(x=>x.mes===m).sort((p,q)=>A[p.a].turma-A[q.a].turma||A[p.a].nome.localeCompare(A[q.a].nome));
+function resumo(m){const r=doMes(m),pr=P[m]||{};const aj=AJ.filter(x=>x.mes===m);const sAj=aj.reduce((s,x)=>s+x.valor,0);
+ const naoIs=r.filter(x=>x.st!=='isento');const isent=r.filter(x=>x.st==='isento');
+ const aRec=naoIs.reduce((s,x)=>s+x.valor,0);const rec=r.filter(x=>x.st==='pago').reduce((s,x)=>s+x.valor,0);
+ const nf=pr.mens?r.length*pr.mens+sAj:null;
+ return{r,n:r.length,aRec,rec,pend:aRec-rec,nf,sAj,aj,igreja:nf==null?null:nf-rec,isent,cobIs:pr.mens?isent.length*pr.mens:null,
+  fora:r.filter(x=>x.st==='pago'&&x.conta&&x.conta!=='PagSeguro'),
+  atrasados:L.filter(x=>x.st==='pago'&&x.pago_em&&x.pago_em.slice(0,7)===m&&x.mes<m)}}
+let dvEsc='ano',dvMes='';
+function dividas(f){const d={};L.filter(x=>x.st==='pendente'&&(!f||f(x))).forEach(x=>{(d[x.a]=d[x.a]||[]).push(x)});
+ return Object.entries(d).map(([a,xs])=>({a:+a,xs,tot:xs.reduce((s,x)=>s+x.valor,0)})).sort((p,q)=>q.tot-p.tot)}
+const $=s=>document.querySelector(s);const app=$('#app');
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
+function nav(){document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.t===tab))}
+function render(){nav();({mes:vMes,ano:vAno,alunos:vAlunos,relatorio:vRel,migracao:vMig})[tab]();}
+function mpick(){const ms=meses(),i=ms.indexOf(mes);return `<div class="mpick"><button data-mv="-1" aria-label="Mês anterior" ${i<=0?'disabled':''}>‹</button><strong>${lbl(mes)}</strong><button data-mv="1" aria-label="Próximo mês" ${i>=ms.length-1?'disabled':''}>›</button></div>`}
+function kpisMes(R){const pct=R.aRec?R.rec/R.aRec*100:0;
+ return `<div class="kpis">
+ <div class="kpi"><small>Recebido dos alunos</small><strong class="pos">${brl(R.rec)}</strong><em>de ${brl(R.aRec)}</em></div>
+ <div class="kpi"><small>Saldo do mês</small><strong class="${R.pend?'neg':''}">${brl(-R.pend)}</strong><em>${R.r.filter(x=>x.st==='pendente').length} pendente(s)</em></div>
+ <div class="kpi"><small>NF do João</small><strong>${brl(R.nf)}</strong><em>${R.n} alunos${R.sAj?' · ajuste '+brl(R.sAj):''}</em></div>
+ <div class="kpi"><small>Parcela da igreja</small><strong>${brl(R.igreja)}</strong><em>${R.isent.length} isento(s)</em></div></div>
+ <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>
+ <div class="legend"><span><b style="background:var(--ok)"></b>${pct.toFixed(0)}% recebido</span>${P[mes]&&P[mes].mens?`<span>Mensalidade ${brl(P[mes].mens)} · aluno paga ${brl(P[mes].aluno)}</span>`:'<span>Mensalidade não registrada neste mês</span>'}</div>`}
+function vMes(){const R=resumo(mes);let rows=R.r;if(filtro==='pend')rows=rows.filter(x=>x.st==='pendente');
+ const last=meses().slice(-1)[0];
+ app.innerHTML=`<div class="bar">${mpick()}<div class="filters"><button class="chip ${filtro==='todos'?'on':''}" data-f="todos">Todos</button><button class="chip ${filtro==='pend'?'on':''}" data-f="pend">Só pendentes</button></div></div>
+ ${kpisMes(R)}
+ <h2>Alunos · toque em Pago ao receber o comprovante</h2>
+ <div class="list">${rows.map(x=>{const i=L.indexOf(x),a=A[x.a];return `<div class="row"><div class="who"><b>${a.nome}</b><small>Turma ${a.turma}</small></div>
+ <div class="seg" role="group" aria-label="Situação de ${a.nome}">${['pago','pendente','isento'].map(s=>`<button class="${s} ${x.st===s?'on':''}" data-set="${i}:${s}">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</div>
+ ${x.st==='pago'?`<div class="detail">Conta: ${['PagSeguro','Bradesco','PicPay','Outra'].map(c=>`<button class="chip ${x.conta===c?(c==='PagSeguro'?'on':'on flag'):''}" data-conta="${i}:${c}">${c}</button>`).join('')} ${x.pago_em?'· recebido em '+x.pago_em.split('-').reverse().join('/'):'· data não registrada (histórico)'}</div>`:''}
+ ${x.st==='isento'?`<div class="detail">Motivo <input id="mot${i}" data-mot="${i}" value="${x.motivo}" placeholder="opcional (ex.: bolsa)"></div>`:''}</div>`}).join('')||'<div class="row">Ninguém pendente neste mês.</div>'}</div>
+ <h2>Ajustes da NF</h2>
+ <div class="list">${R.aj.map(j=>`<div class="row"><div class="who"><b>${j.desc}</b><small>${j.aluno!=null?A[j.aluno].nome:'—'}</small></div><b class="${j.valor<0?'neg':''}">${brl(j.valor)}</b></div>`).join('')}
+ <form class="row" id="fAj"><div class="detail" style="color:inherit"><input id="ajv" type="number" step="0.01" placeholder="Valor (±)" style="width:120px" required><input id="ajd" placeholder="Descrição" style="flex:1;min-width:160px" required><button class="btn ghost">Adicionar ajuste</button></div></form></div>
+ <div class="bar" style="margin-top:20px"><button class="btn" data-go="relatorio">Gerar relatório de ${lbl(mes)}</button>${mes===last?`<button class="btn ghost" id="abrir">Abrir ${lbl(nextM(mes))}</button>`:''}</div>`}
+function nextM(m){let[y,mm]=m.split('-').map(Number);mm++;if(mm>12){mm=1;y++}return y+'-'+String(mm).padStart(2,'0')}
+function vAno(){const ms=meses().filter(m=>m.startsWith(ano));const Rs=ms.map(resumo);
+ const t=k=>Rs.reduce((s,r)=>s+(r[k]||0),0);const nfKnown=Rs.every(r=>r.nf!=null);
+ const max=Math.max(...Rs.map(r=>r.aRec),1);
+ const al=[...new Set(L.filter(x=>x.mes.startsWith(ano)).map(x=>x.a))].sort((p,q)=>A[p].nome.localeCompare(A[q].nome));
+ const dv=dividas(dvEsc==='todos'?null:x=>x.mes.startsWith(ano)&&(!dvMes||x.mes===ano+'-'+dvMes));const dvTot=dv.reduce((s,d)=>s+d.tot,0);
+ app.innerHTML=`<div class="bar"><div class="mpick">${['2024','2025','2026'].map(y=>`<button style="width:auto;padding:0 12px;${y===ano?'background:var(--bg);font-weight:700':''}" data-ano="${y}">${y}</button>`).join('')}</div></div>
+ <div class="kpis"><div class="kpi"><small>Recebido no ano</small><strong class="pos">${brl(t('rec'))}</strong><em>de ${brl(t('aRec'))}</em></div>
+ <div class="kpi"><small>Saldo do ano</small><strong class="${t('pend')?'neg':''}">${brl(-t('pend'))}</strong><em>pendências da competência</em></div>
+ <div class="kpi"><small>NFs do João</small><strong>${nfKnown?brl(t('nf')):brl(Rs.reduce((s,r)=>s+(r.nf||0),0))}</strong><em>${nfKnown?ms.length+' meses':'só meses com mensalidade registrada'}</em></div>
+ <div class="kpi"><small>Igreja pagou</small><strong>${brl(Rs.reduce((s,r)=>s+(r.igreja||0),0))}</strong><em>NF − reembolsos</em></div></div>
+ <h2>Recebido × pendente por mês</h2>
+ <div class="chart">${Array.from({length:12},(_,k)=>{const m=ano+'-'+String(k+1).padStart(2,'0');const r=Rs[ms.indexOf(m)];
+  return `<div class="col" title="${r?lbl(m)+': recebido '+brl(r.rec)+', pendente '+brl(r.pend):''}">${r?`<i class="p" style="height:${r.pend/max*110}px"></i><i style="height:${r.rec/max*110}px"></i>`:''}<span>${MN[k]}</span></div>`}).join('')}</div>
+ <div class="legend" style="margin-top:6px"><span><b style="background:var(--ok)"></b>Recebido</span><span><b style="background:var(--warn)"></b>Pendente</span></div>
+ <h2>Quem pagou em ${ano}</h2>
+ <div class="grid-wrap"><table><thead><tr><th>Aluno</th>${Array.from({length:12},(_,k)=>`<th style="text-align:center">${MN[k]}</th>`).join('')}</tr></thead><tbody>
+ ${al.map(a=>`<tr><td>${A[a].nome}</td>${Array.from({length:12},(_,k)=>{const m=ano+'-'+String(k+1).padStart(2,'0');const x=L.find(y=>y.mes===m&&y.a===a);
+  return `<td style="text-align:center">${x?`<span class="cell c-${x.st}" title="${x.st}${x.conta?' · '+x.conta:''}">${x.st==='pago'?(x.conta&&x.conta!=='PagSeguro'?'•':'✓'):x.st==='pendente'?'!':'–'}</span>`:'<span class="cell c-x">·</span>'}</td>`}).join('')}</tr>`).join('')}
+ </tbody></table></div>
+ <div class="legend" style="margin-top:6px"><span><span class="cell c-pago">✓</span> Pago</span><span><span class="cell c-pago">•</span> Pago fora do PagSeguro</span><span><span class="cell c-pendente">!</span> Pendente</span><span><span class="cell c-isento">–</span> Isento</span></div>
+ <h2>Débitos em aberto</h2>
+ <div class="bar"><button class="chip ${dvEsc==='ano'?'on':''}" data-dv="ano">Só ${ano}</button><button class="chip ${dvEsc==='todos'?'on':''}" data-dv="todos">Todos os anos</button>${dvEsc==='ano'?`<select id="dvm" aria-label="Mês"><option value="">Ano inteiro</option>${MF.map((n,k)=>{const v=String(k+1).padStart(2,'0');return `<option value="${v}" ${dvMes===v?'selected':''}>${n}</option>`}).join('')}</select>`:''}<b class="neg" style="margin-left:auto">${brl(dvTot)}</b></div>
+ <div class="list">${dv.length?'':'<div class="row">Nenhum débito neste período.</div>'}${dv.map(d=>`<div class="row"><div class="who"><b>${A[d.a].nome}</b><small>${d.xs.map(x=>short(x.mes)).join(', ')}</small></div><b class="neg">${brl(d.tot)}</b></div>`).join('')}</div>`}
+function vAlunos(){app.innerHTML=`<div class="note">No app real, aluno ativo entra automaticamente no próximo mês aberto. Desativar não apaga o histórico.</div>
+ <h2>Ativos</h2><div class="list">${A.filter(a=>a.ativo).map(row).join('')}</div>
+ <form class="list" id="fAl" style="margin-top:10px"><div class="row"><div class="detail" style="color:inherit"><input id="aln" placeholder="Nome completo" required style="flex:1;min-width:180px"><select id="alt"><option value="1">Turma 1</option><option value="2">Turma 2</option></select><button class="btn ghost">Adicionar aluno</button></div></div></form>
+ <h2>Ex-alunos</h2><div class="list">${A.filter(a=>!a.ativo).map(row).join('')}</div>`;
+ function row(a){return `<div class="row"><div class="who"><b>${a.nome}</b><small>Turma ${a.turma}${a.apelidos.length?' · na planilha: '+a.apelidos.join(', '):''}</small></div><button class="chip ${a.ativo?'on':''}" data-at="${a.id}">${a.ativo?'Ativo':'Inativo'}</button></div>`}}
+function vRel(){const R=resumo(mes);const pagos=R.r.filter(x=>x.st==='pago'),pend=R.r.filter(x=>x.st==='pendente');
+ const tb=(h,rows)=>`<table><thead><tr>${h.map((x,i)=>`<th class="${i===h.length-1?'num':''}">${x}</th>`).join('')}</tr></thead><tbody>${rows.join('')||`<tr><td colspan="${h.length}">Nenhum.</td></tr>`}</tbody></table>`;
+ app.innerHTML=`<div class="bar">${mpick()}<button class="btn" id="pdf">Baixar PDF</button></div>
+ <div class="paper"><div class="ph"><div><b>m<i>.</i> Louvor IMCM</b><div style="font-size:13px;color:#6B6A66">Prestação de contas · Aulas de canto (prof. João Liasch)</div></div><div style="text-align:right;font-size:13px"><b style="font-size:18px;text-transform:capitalize">${lbl(mes)}</b><br>Emitido em ${HOJE.split('-').reverse().join('/')}</div></div>
+ <h3>1 · Nota fiscal</h3>${tb(['Item','Valor'],[`<tr><td>${R.n} alunos × ${brl(P[mes].mens)}</td><td class="num">${brl(P[mes].mens?R.n*P[mes].mens:null)}</td></tr>`,...R.aj.map(j=>`<tr><td>Ajuste: ${j.desc}</td><td class="num">${brl(j.valor)}</td></tr>`),`<tr><td><b>NF final</b></td><td class="num"><b>${brl(R.nf)}</b></td></tr>`])}
+ <h3>2 · Divisão</h3>${tb(['Parte','Valor'],[`<tr><td>Reembolso dos alunos esperado (${R.n-R.isent.length} × ${brl(P[mes].aluno)})</td><td class="num">${brl(R.aRec)}</td></tr>`,`<tr><td>Reembolso recebido</td><td class="num">${brl(R.rec)}</td></tr>`,`<tr><td>Parcela da igreja (NF − recebido)</td><td class="num">${brl(R.igreja)}</td></tr>`])}
+ <h3>3 · Pagaram (${pagos.length})</h3>${tb(['Aluno','Conta','Valor'],pagos.map(x=>`<tr><td>${A[x.a].nome}</td><td>${x.conta||'não informada'}${x.conta&&x.conta!=='PagSeguro'?' <span class="tag">fora do PagSeguro</span>':''}</td><td class="num">${brl(x.valor)}</td></tr>`))}
+ <h3>4 · Não pagaram (${pend.length}) · ${brl(R.pend)}</h3>${tb(['Aluno','Valor'],pend.map(x=>`<tr><td>${A[x.a].nome}</td><td class="num">${brl(x.valor)}</td></tr>`))}
+ <h3>5 · Isentos (${R.isent.length})</h3>${tb(['Aluno','Motivo','Igreja cobre'],R.isent.map(x=>`<tr><td>${A[x.a].nome}</td><td>${x.motivo||'—'}</td><td class="num">${brl(P[mes].mens)}</td></tr>`))}
+ <h3>6 · Recebidos de meses anteriores</h3>${tb(['Aluno','Competência','Valor'],R.atrasados.map(x=>`<tr><td>${A[x.a].nome}</td><td>${short(x.mes)}</td><td class="num">${brl(x.valor)}</td></tr>`))}
+ </div>`}
+function vMig(){const dp=A.filter(a=>a.apelidos.length);
+ app.innerHTML=`<div class="note">Esta aba só existe no protótipo. Confira o de-para e responda os pontos abaixo antes da migração.</div>
+ <h2>De-para de nomes (${dp.length})</h2><div class="grid-wrap"><table><thead><tr><th>Na planilha (2024–2025)</th><th>Nome no app</th></tr></thead><tbody>${dp.map(a=>`<tr><td>${a.apelidos.join(', ')}</td><td><b>${a.nome}</b></td></tr>`).join('')}</tbody></table></div>
+ <h2>Normalizações automáticas</h2><div class="qa">
+ <div><b>Dez/24: Ana Guidelli e May sem situação</b>Migradas como pendente (a planilha soma R$ 140 pendente).</div>
+ <div><b>Antes de jun/25 não há valor de mensalidade</b>NF e parcela da igreja aparecem como "—" nesses meses.</div>
+ <div><b>"Picpay" → PicPay</b>Antes de mai/26 não há conta registrada; pagamentos ficam com conta "não informada".</div></div>
+ <h2>Preciso da sua confirmação</h2><div class="qa">
+ <div><b>Jan/25: meia mensalidade</b>A planilha desconta R$ 35 de alguém. Quem foi?</div>
+ <div><b>Luciana Coutinho</b>Some da lista em mai/26. Ela saiu?</div>
+ <div><b>Mel e Silinha</b>Ex-alunas só com apelido. Têm nome completo?</div></div>`}
+document.querySelector('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;render()}});
+app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.mv){const ms=meses();mes=ms[ms.indexOf(mes)+ +d.mv]||mes;render()}
+ else if(d.f){filtro=d.f;render()}
+ else if(d.set){const[i,s]=d.set.split(':');const x=L[+i];x.st=s;if(s==='pago'){x.conta=x.conta||'PagSeguro';x.pago_em=x.pago_em||HOJE;toast(A[x.a].nome+': pago')}else{x.conta=null;x.pago_em=null}render()}
+ else if(d.conta){const[i,c]=d.conta.split(':');L[+i].conta=c;render()}
+ else if(d.go){tab=d.go;render()}
+ else if(d.ano){ano=d.ano;render()}
+ else if(d.dv){dvEsc=d.dv;dvMes='';render()}
+ else if(d.at){const a=A[+d.at];a.ativo=!a.ativo;render()}
+ else if(b.id==='abrir'){const n=nextM(mes);P[n]={...P[mes]};A.filter(a=>a.ativo).forEach(a=>L.push({mes:n,a:a.id,st:'pendente',conta:null,valor:P[n].aluno,pago_em:null,motivo:''}));mes=n;toast(lbl(n)+' aberto');render()}
+ else if(b.id==='pdf'){toast('No app real, salva o relatório em PDF')}});
+app.addEventListener('change',e=>{if(e.target.id==='dvm'){dvMes=e.target.value;render()}});
+app.addEventListener('input',e=>{if(e.target.dataset.mot)L[+e.target.dataset.mot].motivo=e.target.value});
+app.addEventListener('submit',e=>{e.preventDefault();if(e.target.id==='fAj'){AJ.push({mes,valor:+$('#ajv').value,desc:$('#ajd').value,aluno:null});toast('Ajuste adicionado')}
+ if(e.target.id==='fAl'){A.push({id:A.length,nome:$('#aln').value,apelidos:[],turma:+$('#alt').value,ativo:true});toast('Aluno adicionado')}render()});
+render();
+</script>
