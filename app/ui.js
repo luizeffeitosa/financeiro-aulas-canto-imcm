@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -53,5 +53,21 @@ export function Comprovante({ id, path, url, salvar }) {
       <input id={inputId} type="file" accept="image/*" hidden onChange={enviar} />
       {estado ? <span>{estado}</span> : !url && <span className="hint">só imagem</span>}
     </span>
+  )
+}
+
+// pular direto para qualquer mês (agrupado por ano)
+export function SeletorMes({ atual, meses }) {
+  const router = useRouter()
+  const anos = [...new Set(meses.map((m) => m.slice(0, 4)))].reverse()
+  const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+  return (
+    <select aria-label="Ir para o mês" value={atual} onChange={(e) => router.push(`/mes/${e.target.value}`)}>
+      {anos.map((a) => (
+        <optgroup key={a} label={a}>
+          {meses.filter((m) => m.startsWith(a)).reverse().map((m) => <option key={m} value={m}>{nomes[+m.slice(5) - 1]}/{a}</option>)}
+        </optgroup>
+      ))}
+    </select>
   )
 }

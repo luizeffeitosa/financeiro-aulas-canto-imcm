@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { db, linksComprovantes } from '@/lib/supabase'
-import { brl, rotulo, curto, slug, CONTAS, proximo, anterior } from '@/lib/fmt'
+import { brl, rotulo, curto, slug, CONTAS, proximo, anterior, hojeSP } from '@/lib/fmt'
 import * as A from '@/app/actions'
-import { AutoForm, Comprovante } from '@/app/ui'
+import { AutoForm, Comprovante, SeletorMes } from '@/app/ui'
 
 export default async function Mes({ params, searchParams }) {
   const { m } = await params, { f } = await searchParams
@@ -22,6 +22,7 @@ export default async function Mes({ params, searchParams }) {
   ;(atrasos || []).forEach((d) => { const x = (deve[d.aluno_id] ??= { meses: [], tot: 0 }); x.meses.push(curto(d.competencia.slice(0, 7))); x.tot += Number(d.valor_aluno) })
   const lista = (meses || []).map((x) => x.competencia.slice(0, 7))
   const ultimo = lista.at(-1)
+  const hoje = hojeSP().slice(0, 7)
   if (!r) {
     if (!ultimo || m !== proximo(ultimo)) notFound()
     return (
@@ -50,6 +51,8 @@ export default async function Mes({ params, searchParams }) {
           <strong>{rotulo(m)}</strong>
           {prox ? <Link href={`/mes/${prox}`} aria-label="Próximo mês">›</Link> : <span>›</span>}
         </div>
+        <SeletorMes atual={m} meses={lista} />
+        {m !== hoje && <Link className="chip on" href={`/mes/${hoje}`}>Mês atual</Link>}
         <div className="filters">
           <Link className={`chip ${f !== 'pend' ? 'on' : ''}`} href={`/mes/${m}`}>Todos</Link>
           <Link className={`chip ${f === 'pend' ? 'on' : ''}`} href={`/mes/${m}?f=pend`}>Só pendentes</Link>
