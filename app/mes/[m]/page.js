@@ -54,6 +54,7 @@ export default async function Mes({ params, searchParams }) {
           <Link className={`chip ${f !== 'pend' ? 'on' : ''}`} href={`/mes/${m}`}>Todos</Link>
           <Link className={`chip ${f === 'pend' ? 'on' : ''}`} href={`/mes/${m}?f=pend`}>Só pendentes</Link>
         </div>
+        <Link className="btn" href={`/relatorio/${m}`}>Gerar relatório</Link>
       </div>
 
       <div className="kpis">
@@ -151,7 +152,6 @@ export default async function Mes({ params, searchParams }) {
       </div></div></form>
 
       <div className="bar mt">
-        <Link className="btn" href={`/relatorio/${m}`}>Gerar relatório de {rotulo(m)}</Link>
         {m === ultimo && <Link className="btn ghost" href={`/mes/${proximo(m)}`}>Abrir {rotulo(proximo(m))}</Link>}
       </div>
     </>
