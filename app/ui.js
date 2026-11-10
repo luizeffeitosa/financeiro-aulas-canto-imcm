@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { useState, useRef, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 
 // envia o formulário assim que o campo muda (data do pagamento, motivo da isenção)
@@ -56,18 +56,50 @@ export function Comprovante({ id, path, url, salvar }) {
   )
 }
 
-// pular direto para qualquer mês (agrupado por ano)
-export function SeletorMes({ atual, meses }) {
-  const router = useRouter()
-  const anos = [...new Set(meses.map((m) => m.slice(0, 4)))].reverse()
-  const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+// seletor único: setas para o mês vizinho + toque no nome abre a grade de meses/anos
+const NOMES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+const NOMES_LONGOS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
+export function SeletorMes({ atual, meses, hoje }) {
+  const [aberto, setAberto] = useState(false)
+  const [ano, setAno] = useState(atual.slice(0, 4))
+  const ref = useRef(null)
+  const disponiveis = new Set(meses)
+  const anos = [...new Set(meses.map((m) => m.slice(0, 4)))]
+  const i = meses.indexOf(atual)
+  const ant = meses[i - 1], prox = meses[i + 1]
+  useEffect(() => {
+    if (!aberto) return
+    const fora = (e) => { if (!ref.current?.contains(e.target)) setAberto(false) }
+    const esc = (e) => { if (e.key === 'Escape') setAberto(false) }
+    document.addEventListener('pointerdown', fora); document.addEventListener('keydown', esc)
+    return () => { document.removeEventListener('pointerdown', fora); document.removeEventListener('keydown', esc) }
+  }, [aberto])
   return (
-    <select aria-label="Ir para o mês" value={atual} onChange={(e) => router.push(`/mes/${e.target.value}`)}>
-      {anos.map((a) => (
-        <optgroup key={a} label={a}>
-          {meses.filter((m) => m.startsWith(a)).reverse().map((m) => <option key={m} value={m}>{nomes[+m.slice(5) - 1]}/{a}</option>)}
-        </optgroup>
-      ))}
-    </select>
+    <div className="picker" ref={ref}>
+      {ant ? <Link className="seta" href={`/mes/${ant}`} aria-label="Mês anterior">‹</Link> : <span className="seta off">‹</span>}
+      <button className="rotulo" aria-expanded={aberto} onClick={() => { setAno(atual.slice(0, 4)); setAberto(!aberto) }}>
+        {NOMES_LONGOS[+atual.slice(5) - 1]} {atual.slice(0, 4)} <span aria-hidden="true">▾</span>
+      </button>
+      {prox ? <Link className="seta" href={`/mes/${prox}`} aria-label="Próximo mês">›</Link> : <span className="seta off">›</span>}
+      {aberto && (
+        <div className="pop" role="dialog" aria-label="Escolher mês">
+          <div className="pop-ano">
+            <button aria-label="Ano anterior" disabled={ano <= anos[0]} onClick={() => setAno(String(+ano - 1))}>‹</button>
+            <b>{ano}</b>
+            <button aria-label="Próximo ano" disabled={ano >= anos.at(-1)} onClick={() => setAno(String(+ano + 1))}>›</button>
+          </div>
+          <div className="pop-grade">
+            {NOMES.map((n, k) => {
+              const m = `${ano}-${String(k + 1).padStart(2, '0')}`
+              const cls = [m === atual && 'sel', m === hoje && 'hoje'].filter(Boolean).join(' ')
+              return disponiveis.has(m)
+                ? <Link key={n} href={`/mes/${m}`} className={cls} onClick={() => setAberto(false)}>{n}</Link>
+                : <span key={n} className="off">{n}</span>
+            })}
+          </div>
+          {atual !== hoje && <Link className="pop-hoje" href={`/mes/${hoje}`} onClick={() => setAberto(false)}>Ir para o mês atual</Link>}
+        </div>
+      )}
+    </div>
   )
 }
