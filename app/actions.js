@@ -11,7 +11,7 @@ export async function setStatus(fd) {
   const sb = await db(), status = fd.get('status')
   const patch = status === 'pago'
     ? { status, conta: fd.get('conta') || 'PagSeguro', pago_em: hojeSP() }
-    : { status, conta: null, pago_em: null }
+    : { status, conta: null, pago_em: null, comprovante: null }
   await ok(sb.from('mensalidades').update(patch).eq('id', fd.get('id'))); feito()
 }
 export async function setConta(fd) {
@@ -66,4 +66,14 @@ export async function toggleAluno(fd) {
 }
 export async function sair() {
   const sb = await db(); await sb.auth.signOut(); redirect('/login')
+}
+
+export async function salvarComprovante(id, path) {
+  const sb = await db()
+  const { data: m, error } = await sb.from('mensalidades').update({ comprovante: path }).eq('id', id).select('aluno_id, pago_em').single()
+  if (error) throw new Error(error.message)
+  // um mesmo Pix pode quitar vários meses: replica para os pagamentos do mesmo aluno no mesmo dia sem comprovante
+  if (m.pago_em) await sb.from('mensalidades').update({ comprovante: path })
+    .eq('aluno_id', m.aluno_id).eq('pago_em', m.pago_em).eq('status', 'pago').is('comprovante', null)
+  feito()
 }

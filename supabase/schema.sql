@@ -38,3 +38,12 @@ end $$;
 revoke execute on function abrir_mes(date) from anon, public; grant execute on function abrir_mes(date) to authenticated;
 revoke execute on function is_admin() from anon, public; grant execute on function is_admin() to authenticated;
 -- admin: insert into admins values ('<email do admin>');
+
+-- comprovantes (migration "comprovantes")
+alter table mensalidades add column comprovante text;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('comprovantes', 'comprovantes', false, 5242880, array['image/jpeg','image/png','image/webp']);
+create policy comprovantes_admin_select on storage.objects for select to authenticated using (bucket_id = 'comprovantes' and public.is_admin());
+create policy comprovantes_admin_insert on storage.objects for insert to authenticated with check (bucket_id = 'comprovantes' and public.is_admin());
+create policy comprovantes_admin_update on storage.objects for update to authenticated using (bucket_id = 'comprovantes' and public.is_admin()) with check (bucket_id = 'comprovantes' and public.is_admin());
+create policy comprovantes_admin_delete on storage.objects for delete to authenticated using (bucket_id = 'comprovantes' and public.is_admin());

@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db } from '@/lib/supabase'
-import { brl, rotulo, curto, CONTAS, proximo, anterior } from '@/lib/fmt'
+import { db, linksComprovantes } from '@/lib/supabase'
+import { brl, rotulo, curto, slug, CONTAS, proximo, anterior } from '@/lib/fmt'
 import * as A from '@/app/actions'
-import { AutoForm } from '@/app/ui'
+import { AutoForm, Comprovante } from '@/app/ui'
 
 export default async function Mes({ params, searchParams }) {
   const { m } = await params, { f } = await searchParams
@@ -35,6 +35,7 @@ export default async function Mes({ params, searchParams }) {
   const rows = (lanc || []).sort((a, b) => a.alunos.turma - b.alunos.turma || a.alunos.nome.localeCompare(b.alunos.nome))
   const vis = f === 'pend' ? rows.filter((x) => x.status === 'pendente') : rows
   const pend = rows.filter((x) => x.status === 'pendente').length
+  const links = await linksComprovantes(sb, rows.map((x) => x.comprovante))
   const fora = (lanc || []).map((x) => x.aluno_id)
   const semMes = (alunos || []).filter((a) => !fora.includes(a.id))
   const pct = r.a_receber > 0 ? (r.recebido / r.a_receber) * 100 : 0
@@ -88,6 +89,7 @@ export default async function Mes({ params, searchParams }) {
                     </form>
                   ))}
                 </span>
+                <Comprovante id={x.id} path={`${m.slice(0, 4)}/${m.slice(5, 7)}/${slug(x.alunos.nome)}.jpg`} url={links[x.comprovante]} salvar={A.salvarComprovante} />
                 <AutoForm action={A.setPagoEm}>
                   <input type="hidden" name="id" value={x.id} />
                   <label>recebido em <input type="date" name="pago_em" defaultValue={x.pago_em || ''} /></label>

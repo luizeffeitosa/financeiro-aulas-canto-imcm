@@ -10,7 +10,7 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 2. Marcar pagamentos à medida que os comprovantes chegam (celular).
 3. Gerar o relatório mensal em PDF para o financeiro.
 
-**Fora da v1:** anexo de comprovantes, integração com WhatsApp, envio de e-mail, exportação para planilha, multiusuário.
+**Fora da v1:** integração com WhatsApp, envio de e-mail, exportação para planilha, multiusuário.
 
 ## 3. Regras de negócio
 | # | Regra |
@@ -28,10 +28,11 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 | R11 | **Débitos em aberto por pessoa** = Σ competências `pendente` no período filtrado: um mês, um ano (padrão: o ano selecionado) ou todos os anos. Um período não penaliza o outro. Pendências antigas migram como `pendente` e não há cobrança ativa; não existe status de "perdoado". |
 | R12 | **Abrir mês**: cria uma mensalidade `pendente` para cada aluno ativo. Aluno entra/sai da turma ativando/desativando no cadastro; meses já abertos não mudam. |
 | R14 | **Alerta na visão do mês:** cada aluno com competências anteriores `pendente` mostra quantos meses deve, o total e quais meses. É só informativo. |
+| R15 | **Comprovante** (opcional para marcar pago): só imagem, comprimida no aparelho (≤1600px, JPEG). Guardado no Supabase Storage, bucket privado `comprovantes`, em `AAAA/MM/nome-do-aluno.jpg`. Ao anexar, o mesmo arquivo é ligado aos outros pagamentos do aluno com a mesma data e sem comprovante (um Pix para vários meses). |
 | R13 | Valor da parcela é guardado na própria mensalidade (permite meia mensalidade, ex. jan/25). |
 
 ## 4. Relatório mensal (PDF)
-Cabeçalho IMCM · Louvor · competência. Seções: (1) NF esperada, ajustes, NF final; (2) parcela alunos × parcela igreja; (3) pagantes com conta, destacando fora do PagSeguro; (4) não pagantes e valor pendente; (5) isentos e valor coberto pela igreja; (6) recebimentos no mês de competências anteriores.
+Cabeçalho IMCM · Louvor · competência. Seções: (1) NF esperada, ajustes, NF final; (2) parcela alunos × parcela igreja; (3) pagantes com conta, destacando fora do PagSeguro; (4) não pagantes e valor pendente; (5) isentos e valor coberto pela igreja; (6) recebimentos no mês de competências anteriores; (7) comprovantes: lista de quem enviou e de quem está faltando. Ao final, uma página por comprovante anexado (nome, competências, conta, valor, data).
 
 ## 5. Acesso
 Login por link mágico (Supabase Auth). Apenas o e-mail do Edu (`ADMIN_EMAIL`). RLS em todas as tabelas: só o admin lê/escreve.

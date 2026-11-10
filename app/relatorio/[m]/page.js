@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db } from '@/lib/supabase'
+import { db, linksComprovantes } from '@/lib/supabase'
 import { brl, rotulo, curto, dataBR, hojeSP } from '@/lib/fmt'
 import { Imprimir } from '@/app/ui'
 
@@ -25,6 +25,12 @@ export default async function Relatorio({ params }) {
   const L = (lanc || []).sort((a, b) => a.alunos.nome.localeCompare(b.alunos.nome))
   const pagos = L.filter((x) => x.status === 'pago'), pend = L.filter((x) => x.status === 'pendente'), isent = L.filter((x) => x.status === 'isento')
   const foraPS = pagos.filter((x) => x.conta && x.conta !== 'PagSeguro')
+  // comprovantes: pagamentos da competência + recebidos no mês de competências anteriores
+  const recebidos = [...pagos, ...(atras || [])]
+  const links = await linksComprovantes(sb, recebidos.map((x) => x.comprovante), 3600)
+  const faltando = recebidos.filter((x) => !links[x.comprovante])
+  const anexos = recebidos.filter((x) => links[x.comprovante])
+  const vistos = new Set()
 
   return (
     <>
@@ -65,7 +71,23 @@ export default async function Relatorio({ params }) {
 
         <h3>6 · Recebidos neste mês de meses anteriores</h3>
         <T head={['Aluno', 'Competência', 'Conta', 'Valor']} rows={(atras || []).map((x) => <tr key={x.id}><td>{x.alunos.nome}</td><td>{curto(x.competencia.slice(0, 7))}</td><td>{x.conta}</td><td className="num">{brl(x.valor_aluno)}</td></tr>)} />
+
+        <h3>7 · Comprovantes ({anexos.length} de {recebidos.length}){faltando.length ? <span className="tag"> · {faltando.length} faltando</span> : ''}</h3>
+        <T head={['Aluno', 'Competência', 'Conta', 'Comprovante']} rows={recebidos.map((x) => (
+          <tr key={x.id}><td>{x.alunos.nome}</td><td>{curto(x.competencia.slice(0, 7))}</td><td>{x.conta || '—'}</td>
+            <td className="num">{links[x.comprovante] ? '✓ anexado' : <span className="tag">faltando</span>}</td></tr>))} />
+        {faltando.length > 0 && <p className="aviso">Não enviaram comprovante: {faltando.map((x) => x.alunos.nome).join(', ')}.</p>}
       </article>
+      {anexos.filter((x) => !vistos.has(x.comprovante) && vistos.add(x.comprovante)).map((x) => {
+        const mesmos = anexos.filter((y) => y.comprovante === x.comprovante)
+        return (
+          <article className="paper anexo" key={x.id}>
+            <div className="anexo-cab"><b>Comprovante · {x.alunos.nome}</b><span>{mesmos.map((y) => curto(y.competencia.slice(0, 7))).join(' + ')} · {x.conta || 'conta não informada'} · {brl(mesmos.reduce((s, y) => s + Number(y.valor_aluno), 0))}{x.pago_em ? ` · ${dataBR(x.pago_em)}` : ''}</span></div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={links[x.comprovante]} alt={`Comprovante de ${x.alunos.nome}`} />
+          </article>
+        )
+      })}
     </>
   )
 }
