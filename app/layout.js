@@ -1,4 +1,5 @@
 import './globals.css'
+import Link from 'next/link'
 import { db } from '@/lib/supabase'
 import { sair } from './actions'
 import { Nav } from './ui'
@@ -24,7 +25,7 @@ export default async function Layout({ children }) {
           {user && (
             <header>
               <div className="brand"><b>m<i>.</i> Aulas de Canto</b><span>Louvor IMCM</span></div>
-              <form action={sair} className="sair"><button className="chip">Sair</button></form>
+              <div className="sair inline"><Link className="chip" href="/senha">Senha</Link><form action={sair}><button className="chip">Sair</button></form></div>
             </header>
           )}
           {user && admin && (

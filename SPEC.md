@@ -35,7 +35,7 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 Cabeçalho IMCM · Louvor · competência. Seções: (1) NF esperada, ajustes, NF final; (2) parcela alunos × parcela igreja; (3) pagantes com conta, destacando fora do PagSeguro; (4) não pagantes e valor pendente; (5) isentos e valor coberto pela igreja; (6) recebimentos no mês de competências anteriores; (7) comprovantes: lista de quem enviou e de quem está faltando. Ao final, uma página por comprovante anexado (nome, competências, conta, valor, data).
 
 ## 5. Acesso
-Login por link mágico (Supabase Auth). Apenas o e-mail do Edu (`ADMIN_EMAIL`). RLS em todas as tabelas: só o admin lê/escreve.
+Login por e-mail e senha (Supabase Auth); link mágico como alternativa ("esqueci a senha"). Senha definida em `/senha` com o usuário logado. Login com Google: próximo passo. Apenas e-mails cadastrados na tabela `admins`. RLS em todas as tabelas: só o admin lê/escreve.
 
 ## 6. Modelo de dados (Postgres/Supabase)
 ```
