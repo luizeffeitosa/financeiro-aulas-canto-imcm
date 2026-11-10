@@ -65,18 +65,24 @@ export default async function Mes({ params, searchParams }) {
         {vis.map((x) => (
           <div className="row" key={x.id}>
             <div className="who"><b>{x.alunos.nome}</b><small>Turma {x.alunos.turma}{Number(x.valor_aluno) !== Number(r.valor_aluno) ? ` · parcela ${brl(x.valor_aluno)}` : ''}</small></div>
-            <form action={A.setStatus} className="seg" aria-label={`Situação de ${x.alunos.nome}`}>
-              <input type="hidden" name="id" value={x.id} />
+            <div className="seg" role="group" aria-label={`Situação de ${x.alunos.nome}`}>
               {['pago', 'pendente', 'isento'].map((s) => (
-                <button key={s} name="status" value={s} className={`${s} ${x.status === s ? 'on' : ''}`}>{s[0].toUpperCase() + s.slice(1)}</button>
+                <form key={s} action={A.setStatus}>
+                  <input type="hidden" name="id" value={x.id} /><input type="hidden" name="status" value={s} />
+                  <button className={`${s} ${x.status === s ? 'on' : ''}`}>{s[0].toUpperCase() + s.slice(1)}</button>
+                </form>
               ))}
-            </form>
+            </div>
             {x.status === 'pago' && (
               <div className="detail">
-                <form action={A.setConta} className="inline">
-                  <input type="hidden" name="id" value={x.id} />
-                  {CONTAS.map((c) => <button key={c} name="conta" value={c} className={`chip ${x.conta === c ? (c === 'PagSeguro' ? 'on' : 'on flag') : ''}`}>{c}</button>)}
-                </form>
+                <span className="chips">
+                  {CONTAS.map((c) => (
+                    <form key={c} action={A.setConta}>
+                      <input type="hidden" name="id" value={x.id} /><input type="hidden" name="conta" value={c} />
+                      <button className={`chip ${x.conta === c ? (c === 'PagSeguro' ? 'on' : 'on flag') : ''}`}>{c}</button>
+                    </form>
+                  ))}
+                </span>
                 <AutoForm action={A.setPagoEm}>
                   <input type="hidden" name="id" value={x.id} />
                   <label>recebido em <input type="date" name="pago_em" defaultValue={x.pago_em || ''} /></label>
