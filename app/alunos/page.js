@@ -12,10 +12,11 @@ export default async function Alunos() {
           <small>Turma {a.turma}{a.apelidos?.length ? ` · na planilha: ${a.apelidos.join(', ')}` : ''}</small></div>
         <form action={A.toggleAluno} className="inline"><input type="hidden" name="id" value={a.id} /><input type="hidden" name="ativo" value={String(a.ativo)} />
           <button className={`chip ${a.ativo ? 'on' : ''}`}>{a.ativo ? 'Ativo' : 'Inativo'}</button></form>
-        {a.ativo && (
+        {(
           <AutoForm action={A.atualizarAluno}>
             <div className="campos">
               <input type="hidden" name="id" value={a.id} />
+              <label>Nome<input name="nome" defaultValue={a.nome} required className="nome" /></label>
               <label>Apelido (mensagens)<input name="apelido" defaultValue={a.apelido || ''} placeholder={a.nome.split(' ')[0]} /></label>
               <label>WhatsApp<input name="telefone" type="tel" inputMode="tel" defaultValue={a.telefone || ''} placeholder="(44) 99999-9999" /></label>
             </div>

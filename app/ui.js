@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { IconeEnviar, IconeBaixar } from '@/lib/icones'
 
 // envia o formulário assim que o campo muda (data do pagamento, motivo da isenção)
 export function AutoForm({ action, children }) {
@@ -16,7 +17,7 @@ export function Nav({ ultimo }) {
 }
 
 export function Imprimir() {
-  return <button className="btn" onClick={() => window.print()}>Baixar PDF</button>
+  return <button className="btn ghost" onClick={() => window.print()}><IconeBaixar /> Imprimir / salvar PDF</button>
 }
 
 // reduz a imagem para no máx. 1600px e JPEG ~80% antes de enviar
@@ -115,5 +116,61 @@ export function DesabilitarNoMes({ id, nome, mes, acao }) {
       <button className="chip flag">Confirmar</button>
       <button type="button" className="link" onClick={() => setConf(false)}>Cancelar</button>
     </form>
+  )
+}
+
+// gera o PDF a partir das páginas do relatório (.paper) e compartilha no WhatsApp
+async function gerarPdf() {
+  const [{ jsPDF }, { default: html2canvas }] = await Promise.all([import('jspdf'), import('html2canvas')])
+  // garante que os comprovantes terminaram de carregar
+  await Promise.all([...document.querySelectorAll('.paper img')].map((i) => i.complete ? null : new Promise((ok) => { i.onload = i.onerror = ok })))
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' })
+  const W = 190, H = 277, M = 10
+  let primeira = true
+  for (const el of document.querySelectorAll('.paper')) {
+    const c = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+    const fatiaPx = Math.floor(c.width * (H / W))
+    for (let y = 0; y < c.height; y += fatiaPx) {
+      const h = Math.min(fatiaPx, c.height - y)
+      const f = document.createElement('canvas'); f.width = c.width; f.height = h
+      f.getContext('2d').drawImage(c, 0, y, c.width, h, 0, 0, c.width, h)
+      if (!primeira) pdf.addPage()
+      pdf.addImage(f.toDataURL('image/jpeg', 0.85), 'JPEG', M, M, W, (h * W) / c.width)
+      primeira = false
+    }
+  }
+  return pdf.output('blob')
+}
+
+export function EnviarRelatorio({ mes, texto, auto }) {
+  const [arquivo, setArquivo] = useState(null)
+  const [estado, setEstado] = useState(auto ? 'gerando' : '')
+  const nome = `relatorio-aulas-canto-${mes}.pdf`
+  async function preparar() {
+    setEstado('gerando')
+    try { setArquivo(new File([await gerarPdf()], nome, { type: 'application/pdf' })); setEstado('pronto') }
+    catch { setEstado('erro') }
+  }
+  useEffect(() => { if (auto) { const t = setTimeout(preparar, 300); return () => clearTimeout(t) } }, [auto]) // espera as imagens carregarem
+  async function enviar() {
+    try { await navigator.clipboard?.writeText(texto) } catch {}
+    if (navigator.canShare?.({ files: [arquivo] })) {
+      try { await navigator.share({ files: [arquivo], text: texto }) } catch {}
+    } else {
+      // computador: baixa o PDF e abre o WhatsApp com o texto
+      const a = document.createElement('a'); a.href = URL.createObjectURL(arquivo); a.download = nome; a.click()
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank')
+    }
+  }
+  if (estado === 'pronto') return (
+    <span className="inline">
+      <button className="btn wa-btn" onClick={enviar}><IconeEnviar /> Enviar no WhatsApp</button>
+      <span className="hint">O texto também fica copiado, caso o WhatsApp não use a legenda.</span>
+    </span>
+  )
+  return (
+    <button className="btn wa-btn" onClick={preparar} disabled={estado === 'gerando'}>
+      <IconeEnviar /> {estado === 'gerando' ? 'Preparando PDF…' : estado === 'erro' ? 'Erro, tentar de novo' : 'Enviar relatório'}
+    </button>
   )
 }

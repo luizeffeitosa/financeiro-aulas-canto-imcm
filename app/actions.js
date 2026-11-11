@@ -85,8 +85,12 @@ export async function salvarComprovante(id, path) {
 
 export async function atualizarAluno(fd) {
   const sb = await db()
-  await ok(sb.from('alunos').update({
+  const nome = fd.get('nome')?.trim()
+  const { error } = await sb.from('alunos').update({
+    ...(nome ? { nome } : {}),
     apelido: fd.get('apelido')?.trim() || null,
     telefone: fd.get('telefone')?.replace(/\D/g, '') || null,
-  }).eq('id', fd.get('id'))); feito()
+  }).eq('id', fd.get('id'))
+  if (error) throw new Error(error.code === '23505' ? 'Já existe um aluno com esse nome.' : error.message)
+  feito()
 }

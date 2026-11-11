@@ -31,6 +31,7 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 | R15 | **Comprovante** (opcional para marcar pago): só imagem, comprimida no aparelho (≤1600px, JPEG). Guardado no Supabase Storage, bucket privado `comprovantes`, em `AAAA/MM/nome-do-aluno.jpg`. Ao anexar, o mesmo arquivo é ligado aos outros pagamentos do aluno com a mesma data e sem comprovante (um Pix para vários meses). |
 | R16 | **Apelido e WhatsApp** no cadastro do aluno. O botão **Cobrar no WhatsApp** (linhas com o mês pendente e/ou o mês anterior pendente) abre o WhatsApp com a mensagem pronta usando o apelido (ou o primeiro nome); sem telefone, o WhatsApp pede o contato. |
 | R17 | **Habilitar/desabilitar no mês:** todos os alunos cadastrados aparecem em cada mês. Status `desabilitado` = fora da NF e do reembolso (afastado ou saiu). Ao abrir um mês, vem desabilitado quem é inativo no cadastro ou estava desabilitado no mês anterior; os demais vêm pendentes. Desabilitar pede confirmação e não vale para quem já pagou. |
+| R18 | **Enviar relatório:** gera o PDF no aparelho (páginas do relatório + comprovantes) e abre o compartilhamento para o WhatsApp com o texto "Oi, fulano! Tudo certo? Segue o relatório de <mês> referente às aulas de canto." (destinatário em `lib/fmt.js`, `FINANCEIRO`). No computador, baixa o PDF e abre o WhatsApp com o texto. "Visualizar relatório" só abre a página. |
 | R13 | Valor da parcela é guardado na própria mensalidade (permite meia mensalidade, ex. jan/25). |
 
 ## 4. Relatório mensal (PDF)
@@ -51,7 +52,7 @@ ajustes       (id, competencia fk, valor numeric, descricao text, aluno_id fk nu
 Cálculos (R6–R11) numa view `resumo_mes`; o app só lê.
 
 ## 7. Arquitetura
-Um único app **Next.js (App Router) na Vercel** + **Supabase** (`@supabase/ssr`). Server Actions para escrita, sem API própria. CSS simples, sem biblioteca de UI. PDF pela página `/relatorio/[mes]` com CSS de impressão (Salvar como PDF do navegador). Repositório `luizeffeitosa/financeiro-aulas-canto-imcm`, commits direto na `main`, deploy automático.
+Um único app **Next.js (App Router) na Vercel** + **Supabase** (`@supabase/ssr`). Server Actions para escrita, sem API própria. CSS simples, sem biblioteca de UI. PDF pela página `/relatorio/[mes]`: CSS de impressão para imprimir/salvar e jsPDF + html2canvas para gerar o arquivo e compartilhar no WhatsApp. Repositório `luizeffeitosa/financeiro-aulas-canto-imcm`, commits direto na `main`, deploy automático.
 
 ## 8. Migração
 Script único lê o `.xlsx` original → normaliza → insere. Planilha vira arquivo morto (não é alterada). Regras: de-para de nomes (§9), célula vazia = `pendente`, `Picpay` → `PicPay`, mensalidade desconhecida antes de jun/25 (`null`, NF não exibida), 2 ajustes de 2026 migrados como lançamentos.

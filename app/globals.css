@@ -145,3 +145,7 @@ th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 .desab{display:block;color:var(--muted)}
 .desab summary{cursor:pointer;font-size:13px;font-weight:600}
 .desab-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px dashed var(--line);margin-top:6px}
+.btn,.chip{gap:6px}
+.btn{display:inline-flex;align-items:center}
+.btn.wa-btn{background:#1E7A4C;border-color:#1E7A4C;color:#fff}
+.campos input.nome{width:220px}

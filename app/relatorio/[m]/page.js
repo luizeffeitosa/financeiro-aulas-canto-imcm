@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { db, linksComprovantes } from '@/lib/supabase'
-import { brl, rotulo, curto, dataBR, hojeSP } from '@/lib/fmt'
-import { Imprimir } from '@/app/ui'
+import { brl, rotulo, curto, dataBR, hojeSP, textoRelatorio } from '@/lib/fmt'
+import { Imprimir, EnviarRelatorio } from '@/app/ui'
 
 function T({ head, rows }) {
   return (
@@ -11,8 +11,8 @@ function T({ head, rows }) {
   )
 }
 
-export default async function Relatorio({ params }) {
-  const { m } = await params
+export default async function Relatorio({ params, searchParams }) {
+  const { m } = await params, { enviar } = await searchParams
   const comp = `${m}-01`, sb = await db()
   const fimMes = new Date(+m.slice(0, 4), +m.slice(5, 7), 0).toISOString().slice(0, 10)
   const [{ data: r }, { data: lanc }, { data: aj }, { data: atras }] = await Promise.all([
@@ -34,7 +34,7 @@ export default async function Relatorio({ params }) {
 
   return (
     <>
-      <div className="bar noprint"><Link className="btn ghost" href={`/mes/${m}`}>‹ Voltar</Link><Imprimir /></div>
+      <div className="bar noprint"><Link className="btn ghost" href={`/mes/${m}`}>‹ Voltar</Link><Imprimir /><EnviarRelatorio mes={m} texto={textoRelatorio(m)} auto={enviar === '1'} /></div>
       <article className="paper">
         <div className="ph">
           <div><b className="logo">m<i>.</i> Louvor IMCM</b><div className="sub">Prestação de contas · Aulas de canto (prof. João Liasch)</div></div>
@@ -84,7 +84,7 @@ export default async function Relatorio({ params }) {
           <article className="paper anexo" key={x.id}>
             <div className="anexo-cab"><b>Comprovante · {x.alunos.nome}</b><span>{mesmos.map((y) => curto(y.competencia.slice(0, 7))).join(' + ')} · {x.conta || 'conta não informada'} · {brl(mesmos.reduce((s, y) => s + Number(y.valor_aluno), 0))}{x.pago_em ? ` · ${dataBR(x.pago_em)}` : ''}</span></div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={links[x.comprovante]} alt={`Comprovante de ${x.alunos.nome}`} />
+            <img crossOrigin="anonymous" src={links[x.comprovante]} alt={`Comprovante de ${x.alunos.nome}`} />
           </article>
         )
       })}

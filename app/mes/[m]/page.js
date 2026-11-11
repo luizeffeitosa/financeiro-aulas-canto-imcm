@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { db, linksComprovantes } from '@/lib/supabase'
 import { brl, rotulo, curto, slug, CONTAS, proximo, anterior, hojeSP, linkCobranca } from '@/lib/fmt'
 import * as A from '@/app/actions'
+import { IconeEnviar, IconeMensagem, IconeOlho } from '@/lib/icones'
 import { AutoForm, Comprovante, SeletorMes, DesabilitarNoMes } from '@/app/ui'
 
 export default async function Mes({ params, searchParams }) {
@@ -53,7 +54,10 @@ export default async function Mes({ params, searchParams }) {
           <Link className={`chip ${f !== 'pend' ? 'on' : ''}`} href={`/mes/${m}`}>Todos</Link>
           <Link className={`chip ${f === 'pend' ? 'on' : ''}`} href={`/mes/${m}?f=pend`}>Só pendentes</Link>
         </div>
-        <Link className="btn" href={`/relatorio/${m}`}>Gerar relatório</Link>
+        <span className="inline">
+          <Link className="btn ghost" href={`/relatorio/${m}`}><IconeOlho /> Visualizar relatório</Link>
+          <Link className="btn wa-btn" href={`/relatorio/${m}?enviar=1`}><IconeEnviar /> Enviar relatório</Link>
+        </span>
       </div>
 
       <div className="kpis">
@@ -107,7 +111,7 @@ export default async function Mes({ params, searchParams }) {
             {(x.status === 'pendente' || deveAnterior.has(x.aluno_id)) && (
               <div className="detail">
                 <a className="chip wa" target="_blank" rel="noreferrer"
-                  href={linkCobranca(x.alunos, m, hoje, x.status === 'pendente', deveAnterior.has(x.aluno_id))}>Cobrar no WhatsApp</a>
+                  href={linkCobranca(x.alunos, m, hoje, x.status === 'pendente', deveAnterior.has(x.aluno_id))}><IconeMensagem /> Cobrar no WhatsApp</a>
                 {x.status !== 'pago' && <DesabilitarNoMes id={x.id} nome={x.alunos.apelido || x.alunos.nome.split(' ')[0]} mes={rotulo(m)} acao={A.desabilitarNoMes} />}
               </div>
             )}
