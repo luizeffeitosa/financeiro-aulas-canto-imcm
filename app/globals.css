@@ -149,3 +149,9 @@ th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 .btn{display:inline-flex;align-items:center}
 .btn.wa-btn{background:#1E7A4C;border-color:#1E7A4C;color:#fff}
 .campos input.nome{width:220px}
+.grupo{margin-top:14px}
+.grupo-tit{font-size:14px;font-weight:700;margin:0 0 6px;color:var(--navy)}
+.grupo-tit span{color:var(--muted);font-weight:500}
+.row.grupo-row{background:var(--bg);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);padding:6px 14px}
+tr.grupo-tr td{background:var(--bg);font-weight:700;color:var(--navy);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.paper tr.grupo-tr td{background:#F3F1EC;color:#0C1E3C}

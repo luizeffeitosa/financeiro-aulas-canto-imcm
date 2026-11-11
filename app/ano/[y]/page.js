@@ -1,19 +1,21 @@
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db } from '@/lib/supabase'
-import { brl, curto, MES_CURTO, MESES } from '@/lib/fmt'
+import { db, listarTurmas } from '@/lib/supabase'
+import { brl, curto, MES_CURTO, MESES, agrupar } from '@/lib/fmt'
 
 export default async function Ano({ params, searchParams }) {
   const { y } = await params, { escopo = 'ano', mes = '' } = await searchParams
   if (!/^\d{4}$/.test(y)) notFound()
   const sb = await db(), ini = `${y}-01-01`, fim = `${y}-12-01`
-  let qDeb = sb.from('mensalidades').select('competencia, valor_aluno, aluno_id, alunos(nome)').eq('status', 'pendente').order('competencia')
+  let qDeb = sb.from('mensalidades').select('competencia, valor_aluno, aluno_id, alunos(nome, turma)').eq('status', 'pendente').order('competencia')
   if (escopo !== 'todos') qDeb = mes ? qDeb.eq('competencia', `${y}-${mes}-01`) : qDeb.gte('competencia', ini).lte('competencia', fim)
-  const [{ data: anos }, { data: res }, { data: lanc }, { data: deb }] = await Promise.all([
+  const [{ data: anos }, { data: res }, { data: lanc }, { data: deb }, turmas] = await Promise.all([
     sb.from('meses').select('competencia'),
     sb.from('resumo_mes').select('*').gte('competencia', ini).lte('competencia', fim).order('competencia'),
-    sb.from('mensalidades').select('competencia, status, conta, aluno_id, alunos(nome)').gte('competencia', ini).lte('competencia', fim).neq('status', 'desabilitado'),
+    sb.from('mensalidades').select('competencia, status, conta, aluno_id, alunos(nome, turma)').gte('competencia', ini).lte('competencia', fim).neq('status', 'desabilitado'),
     qDeb,
+    listarTurmas(sb),
   ])
   const listaAnos = [...new Set((anos || []).map((x) => x.competencia.slice(0, 4)))].sort()
   const R = res || []
@@ -22,11 +24,12 @@ export default async function Ano({ params, searchParams }) {
   const max = Math.max(...R.map((r) => Number(r.a_receber)), 1)
   const porMes = Object.fromEntries(R.map((r) => [+r.competencia.slice(5, 7), r]))
   const alunos = {}
-  ;(lanc || []).forEach((x) => { (alunos[x.aluno_id] ??= { nome: x.alunos.nome, m: {} }).m[+x.competencia.slice(5, 7)] = x })
-  const linhas = Object.values(alunos).sort((a, b) => a.nome.localeCompare(b.nome))
+  ;(lanc || []).forEach((x) => { (alunos[x.aluno_id] ??= { nome: x.alunos.nome, turma: x.alunos.turma, m: {} }).m[+x.competencia.slice(5, 7)] = x })
+  const linhas = agrupar(Object.values(alunos), turmas)
   const devedores = {}
-  ;(deb || []).forEach((x) => { const d = (devedores[x.aluno_id] ??= { nome: x.alunos.nome, xs: [], tot: 0 }); d.xs.push(x.competencia.slice(0, 7)); d.tot += Number(x.valor_aluno) })
-  const dv = Object.values(devedores).sort((a, b) => b.tot - a.tot)
+  ;(deb || []).forEach((x) => { const d = (devedores[x.aluno_id] ??= { nome: x.alunos.nome, turma: x.alunos.turma, xs: [], tot: 0 }); d.xs.push(x.competencia.slice(0, 7)); d.tot += Number(x.valor_aluno) })
+  const dv = Object.values(devedores)
+  const dvGrupos = agrupar(dv, turmas)
   const dvTot = dv.reduce((s, d) => s + d.tot, 0)
   const q = (o) => `/ano/${y}?${new URLSearchParams(o)}`
 
@@ -53,10 +56,10 @@ export default async function Ano({ params, searchParams }) {
       <h2>Quem pagou em {y}</h2>
       <div className="grid-wrap"><table>
         <thead><tr><th>Aluno</th>{MES_CURTO.map((n) => <th key={n} className="c">{n}</th>)}</tr></thead>
-        <tbody>{linhas.map((a) => (
+        <tbody>{linhas.map((g) => (<Fragment key={g.id}><tr className="grupo-tr"><td colSpan={13}>{g.nome}</td></tr>{g.itens.map((a) => (
           <tr key={a.nome}><td>{a.nome}</td>{MES_CURTO.map((n, k) => { const x = a.m[k + 1]; return (
             <td key={n} className="c">{x ? <span className={`cell c-${x.status}`} title={`${x.status}${x.conta ? ' · ' + x.conta : ''}`}>{x.status === 'pago' ? (x.conta && x.conta !== 'PagSeguro' ? '•' : '✓') : x.status === 'pendente' ? '!' : '–'}</span> : <span className="cell c-x">·</span>}</td>) })}</tr>
-        ))}</tbody>
+        ))}</Fragment>))}</tbody>
       </table></div>
       <div className="legend"><span><span className="cell c-pago">✓</span> Pago</span><span><span className="cell c-pago">•</span> Pago fora do PagSeguro</span><span><span className="cell c-pendente">!</span> Pendente</span><span><span className="cell c-isento">–</span> Isento</span></div>
 
@@ -73,7 +76,7 @@ export default async function Ano({ params, searchParams }) {
         <b className="neg push">{brl(dvTot)}</b>
       </div>
       <div className="list">
-        {dv.map((d) => <div className="row" key={d.nome}><div className="who"><b>{d.nome}</b><small>{d.xs.map(curto).join(', ')}</small></div><b className="neg">{brl(d.tot)}</b></div>)}
+        {dvGrupos.map((g) => (<Fragment key={g.id}><div className="row grupo-row">{g.nome}</div>{g.itens.map((d) => <div className="row" key={d.nome}><div className="who"><b>{d.nome}</b><small>{d.xs.map(curto).join(', ')}</small></div><b className="neg">{brl(d.tot)}</b></div>)}</Fragment>))}
         {!dv.length && <div className="row">Nenhum débito neste período.</div>}
       </div>
     </>

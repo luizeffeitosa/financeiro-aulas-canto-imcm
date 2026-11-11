@@ -32,6 +32,7 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 | R16 | **Apelido e WhatsApp** no cadastro do aluno. O botão **Cobrar no WhatsApp** (linhas com o mês pendente e/ou o mês anterior pendente) abre o WhatsApp com a mensagem pronta usando o apelido (ou o primeiro nome); sem telefone, o WhatsApp pede o contato. |
 | R17 | **Habilitar/desabilitar no mês:** todos os alunos cadastrados aparecem em cada mês. Status `desabilitado` = fora da NF e do reembolso (afastado ou saiu). Ao abrir um mês, vem desabilitado quem é inativo no cadastro ou estava desabilitado no mês anterior; os demais vêm pendentes. Desabilitar pede confirmação e não vale para quem já pagou. |
 | R18 | **Enviar relatório:** gera o PDF no aparelho (páginas do relatório + comprovantes) e abre o compartilhamento para o WhatsApp com o texto "Oi, fulano! Tudo certo? Segue o relatório de <mês> referente às aulas de canto." (destinatário em `lib/fmt.js`, `FINANCEIRO`). No computador, baixa o PDF e abre o WhatsApp com o texto. "Visualizar relatório" só abre a página. |
+| R19 | **Turmas** são cadastráveis (incluir, renomear, excluir). O aluno pertence a uma turma ou fica "Sem turma"; excluir uma turma deixa seus alunos sem turma. Toda lista de pessoas (mês, ano, débitos, alunos, relatório) é agrupada por turma (na ordem de criação, "Sem turma" no fim) e, dentro dela, em ordem alfabética. A turma exibida é a atual do aluno, também nos meses passados. |
 | R13 | Valor da parcela é guardado na própria mensalidade (permite meia mensalidade, ex. jan/25). |
 
 ## 4. Relatório mensal (PDF)
@@ -42,7 +43,8 @@ Login por e-mail e senha (Supabase Auth); link mágico como alternativa ("esquec
 
 ## 6. Modelo de dados (Postgres/Supabase)
 ```
-alunos        (id, nome, apelidos text[], apelido text, telefone text, turma int, ativo bool)
+turmas        (id, nome unique, ordem int)
+alunos        (id, nome, apelidos text[], apelido text, telefone text, turma fk null, ativo bool)
 meses         (competencia date pk, valor_mensalidade numeric null, valor_aluno numeric)
 mensalidades  (id, competencia fk, aluno_id fk, status, valor_aluno numeric,
                conta text null, pago_em date null, motivo text null,

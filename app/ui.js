@@ -174,3 +174,17 @@ export function EnviarRelatorio({ mes, texto, auto }) {
     </button>
   )
 }
+
+// botão que pede confirmação na própria linha antes de enviar o formulário
+export function Confirmar({ acao, campos, rotulo, pergunta }) {
+  const [conf, setConf] = useState(false)
+  if (!conf) return <button type="button" className="link" onClick={() => setConf(true)}>{rotulo}</button>
+  return (
+    <form action={acao} className="inline confirma">
+      {Object.entries(campos).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
+      <span>{pergunta}</span>
+      <button className="chip flag">Confirmar</button>
+      <button type="button" className="link" onClick={() => setConf(false)}>Cancelar</button>
+    </form>
+  )
+}

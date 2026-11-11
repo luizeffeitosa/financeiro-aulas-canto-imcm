@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db, linksComprovantes } from '@/lib/supabase'
-import { brl, rotulo, curto, dataBR, hojeSP, textoRelatorio } from '@/lib/fmt'
+import { db, linksComprovantes, listarTurmas } from '@/lib/supabase'
+import { brl, rotulo, curto, dataBR, hojeSP, textoRelatorio, agrupar } from '@/lib/fmt'
 import { Imprimir, EnviarRelatorio } from '@/app/ui'
 
 function T({ head, rows }) {
@@ -15,13 +15,17 @@ export default async function Relatorio({ params, searchParams }) {
   const { m } = await params, { enviar } = await searchParams
   const comp = `${m}-01`, sb = await db()
   const fimMes = new Date(+m.slice(0, 4), +m.slice(5, 7), 0).toISOString().slice(0, 10)
-  const [{ data: r }, { data: lanc }, { data: aj }, { data: atras }] = await Promise.all([
+  const [{ data: r }, { data: lanc }, { data: aj }, { data: atras }, turmas] = await Promise.all([
     sb.from('resumo_mes').select('*').eq('competencia', comp).maybeSingle(),
-    sb.from('mensalidades').select('*, alunos(nome)').eq('competencia', comp),
+    sb.from('mensalidades').select('*, alunos(nome, turma)').eq('competencia', comp),
     sb.from('ajustes').select('*').eq('competencia', comp).order('id'),
-    sb.from('mensalidades').select('*, alunos(nome)').eq('status', 'pago').lt('competencia', comp).gte('pago_em', comp).lte('pago_em', fimMes),
+    sb.from('mensalidades').select('*, alunos(nome, turma)').eq('status', 'pago').lt('competencia', comp).gte('pago_em', comp).lte('pago_em', fimMes),
+    listarTurmas(sb),
   ])
   if (!r) notFound()
+  // linhas agrupadas por turma, com uma linha de título por grupo
+  const porTurma = (lista, cols, render) => agrupar(lista, turmas, (x) => x.alunos).flatMap((g) => [
+    <tr key={`g${g.id}`} className="grupo-tr"><td colSpan={cols}>{g.nome}</td></tr>, ...g.itens.map(render)])
   const L = (lanc || []).sort((a, b) => a.alunos.nome.localeCompare(b.alunos.nome))
   const pagos = L.filter((x) => x.status === 'pago'), pend = L.filter((x) => x.status === 'pendente'), isent = L.filter((x) => x.status === 'isento')
   const foraPS = pagos.filter((x) => x.conta && x.conta !== 'PagSeguro')
@@ -60,20 +64,20 @@ export default async function Relatorio({ params, searchParams }) {
           <tr key="3"><td>Parcela da igreja (NF − recebido)</td><td className="num">{brl(r.parcela_igreja)}</td></tr>]} />
 
         <h3>3 · Pagaram ({pagos.length}){foraPS.length ? ` · ${foraPS.length} fora do PagSeguro` : ''}</h3>
-        <T head={['Aluno', 'Conta', 'Data', 'Valor']} rows={pagos.map((x) => (
+        <T head={['Aluno', 'Conta', 'Data', 'Valor']} rows={porTurma(pagos, 4, (x) => (
           <tr key={x.id}><td>{x.alunos.nome}</td><td>{x.conta || 'não informada'}{x.conta && x.conta !== 'PagSeguro' && <span className="tag"> fora do PagSeguro</span>}</td><td>{dataBR(x.pago_em)}</td><td className="num">{brl(x.valor_aluno)}</td></tr>))} />
 
         <h3>4 · Não pagaram ({pend.length}) · {brl(r.pendente)}</h3>
-        <T head={['Aluno', 'Valor']} rows={pend.map((x) => <tr key={x.id}><td>{x.alunos.nome}</td><td className="num">{brl(x.valor_aluno)}</td></tr>)} />
+        <T head={['Aluno', 'Valor']} rows={porTurma(pend, 2, (x) => <tr key={x.id}><td>{x.alunos.nome}</td><td className="num">{brl(x.valor_aluno)}</td></tr>)} />
 
         <h3>5 · Isentos ({isent.length})</h3>
-        <T head={['Aluno', 'Motivo', 'Igreja cobre']} rows={isent.map((x) => <tr key={x.id}><td>{x.alunos.nome}</td><td>{x.motivo || '—'}</td><td className="num">{brl(r.valor_mensalidade)}</td></tr>)} />
+        <T head={['Aluno', 'Motivo', 'Igreja cobre']} rows={porTurma(isent, 3, (x) => <tr key={x.id}><td>{x.alunos.nome}</td><td>{x.motivo || '—'}</td><td className="num">{brl(r.valor_mensalidade)}</td></tr>)} />
 
         <h3>6 · Recebidos neste mês de meses anteriores</h3>
-        <T head={['Aluno', 'Competência', 'Conta', 'Valor']} rows={(atras || []).map((x) => <tr key={x.id}><td>{x.alunos.nome}</td><td>{curto(x.competencia.slice(0, 7))}</td><td>{x.conta}</td><td className="num">{brl(x.valor_aluno)}</td></tr>)} />
+        <T head={['Aluno', 'Competência', 'Conta', 'Valor']} rows={porTurma(atras || [], 4, (x) => <tr key={x.id}><td>{x.alunos.nome}</td><td>{curto(x.competencia.slice(0, 7))}</td><td>{x.conta}</td><td className="num">{brl(x.valor_aluno)}</td></tr>)} />
 
         <h3>7 · Comprovantes ({anexos.length} de {recebidos.length}){faltando.length ? <span className="tag"> · {faltando.length} faltando</span> : ''}</h3>
-        <T head={['Aluno', 'Competência', 'Conta', 'Comprovante']} rows={recebidos.map((x) => (
+        <T head={['Aluno', 'Competência', 'Conta', 'Comprovante']} rows={porTurma(recebidos, 4, (x) => (
           <tr key={x.id}><td>{x.alunos.nome}</td><td>{curto(x.competencia.slice(0, 7))}</td><td>{x.conta || '—'}</td>
             <td className="num">{links[x.comprovante] ? '✓ anexado' : <span className="tag">faltando</span>}</td></tr>))} />
         {faltando.length > 0 && <p className="aviso">Não enviaram comprovante: {faltando.map((x) => x.alunos.nome).join(', ')}.</p>}

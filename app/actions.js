@@ -49,7 +49,7 @@ export async function abrirMes(fd) {
 }
 export async function addAluno(fd) {
   const sb = await db()
-  await ok(sb.from('alunos').insert({ nome: fd.get('nome').trim(), turma: Number(fd.get('turma')) })); feito()
+  await ok(sb.from('alunos').insert({ nome: fd.get('nome').trim(), turma: Number(fd.get('turma')) || null })); feito()
 }
 export async function addAlunoNoMes(fd) {
   const sb = await db(), comp = fd.get('competencia')
@@ -88,9 +88,29 @@ export async function atualizarAluno(fd) {
   const nome = fd.get('nome')?.trim()
   const { error } = await sb.from('alunos').update({
     ...(nome ? { nome } : {}),
+    turma: Number(fd.get('turma')) || null,
     apelido: fd.get('apelido')?.trim() || null,
     telefone: fd.get('telefone')?.replace(/\D/g, '') || null,
   }).eq('id', fd.get('id'))
   if (error) throw new Error(error.code === '23505' ? 'Já existe um aluno com esse nome.' : error.message)
   feito()
+}
+
+export async function addTurma(fd) {
+  const sb = await db()
+  const { data } = await sb.from('turmas').select('ordem').order('ordem', { ascending: false }).limit(1)
+  const { error } = await sb.from('turmas').insert({ nome: fd.get('nome').trim(), ordem: (data?.[0]?.ordem || 0) + 1 })
+  if (error) throw new Error(error.code === '23505' ? 'Já existe uma turma com esse nome.' : error.message)
+  feito()
+}
+export async function renomearTurma(fd) {
+  const sb = await db(), nome = fd.get('nome')?.trim()
+  if (!nome) return
+  const { error } = await sb.from('turmas').update({ nome }).eq('id', fd.get('id'))
+  if (error) throw new Error(error.code === '23505' ? 'Já existe uma turma com esse nome.' : error.message)
+  feito()
+}
+export async function excluirTurma(fd) {
+  const sb = await db()
+  await ok(sb.from('turmas').delete().eq('id', fd.get('id'))); feito() // alunos ficam "Sem turma"
 }

@@ -1,7 +1,8 @@
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { db, linksComprovantes } from '@/lib/supabase'
-import { brl, rotulo, curto, slug, CONTAS, proximo, anterior, hojeSP, linkCobranca } from '@/lib/fmt'
+import { db, linksComprovantes, listarTurmas } from '@/lib/supabase'
+import { brl, rotulo, curto, slug, CONTAS, proximo, anterior, hojeSP, linkCobranca, agrupar } from '@/lib/fmt'
 import * as A from '@/app/actions'
 import { IconeEnviar, IconeMensagem, IconeOlho } from '@/lib/icones'
 import { AutoForm, Comprovante, SeletorMes, DesabilitarNoMes } from '@/app/ui'
@@ -10,13 +11,14 @@ export default async function Mes({ params, searchParams }) {
   const { m } = await params, { f } = await searchParams
   if (!/^\d{4}-\d{2}$/.test(m)) notFound()
   const comp = `${m}-01`, sb = await db()
-  const [{ data: meses }, { data: r }, { data: lanc }, { data: ajustes }, { data: alunos }, { data: atrasos }] = await Promise.all([
+  const [{ data: meses }, { data: r }, { data: lanc }, { data: ajustes }, { data: alunos }, { data: atrasos }, turmas] = await Promise.all([
     sb.from('meses').select('competencia').order('competencia'),
     sb.from('resumo_mes').select('*').eq('competencia', comp).maybeSingle(),
     sb.from('mensalidades').select('*, alunos(nome, turma, apelido, telefone)').eq('competencia', comp),
     sb.from('ajustes').select('*, alunos(nome)').eq('competencia', comp).order('id'),
     sb.from('alunos').select('id, nome').eq('ativo', true).order('nome'),
     sb.from('mensalidades').select('aluno_id, competencia, valor_aluno').eq('status', 'pendente').lt('competencia', comp).order('competencia'),
+    listarTurmas(sb),
   ])
   // débitos de meses anteriores por aluno (alerta na lista)
   const deve = {}
@@ -36,7 +38,7 @@ export default async function Mes({ params, searchParams }) {
       </div>
     )
   }
-  const todos = (lanc || []).sort((a, b) => a.alunos.turma - b.alunos.turma || a.alunos.nome.localeCompare(b.alunos.nome))
+  const todos = (lanc || []).sort((a, b) => a.alunos.nome.localeCompare(b.alunos.nome))
   const rows = todos.filter((x) => x.status !== 'desabilitado')
   const desab = todos.filter((x) => x.status === 'desabilitado')
   const vis = f === 'pend' ? rows.filter((x) => x.status === 'pendente') : rows
@@ -71,9 +73,11 @@ export default async function Mes({ params, searchParams }) {
 
       <h2>Alunos · toque em Pago ao receber o comprovante</h2>
       <div className="list">
-        {vis.map((x) => (
+        {agrupar(vis, turmas, (x) => x.alunos).map((g) => (<Fragment key={g.id}>
+          <div className="row grupo-row">{g.nome} · {g.itens.length}</div>
+          {g.itens.map((x) => (
           <div className="row" key={x.id}>
-            <div className="who"><b>{x.alunos.nome}</b><small>Turma {x.alunos.turma}{Number(x.valor_aluno) !== Number(r.valor_aluno) ? ` · parcela ${brl(x.valor_aluno)}` : ''}</small>
+            <div className="who"><b>{x.alunos.nome}</b>{Number(x.valor_aluno) !== Number(r.valor_aluno) && <small>parcela {brl(x.valor_aluno)}</small>}
               {deve[x.aluno_id] && <small className="alerta">⚠ Deve {deve[x.aluno_id].meses.length === 1 ? '1 mês anterior' : `${deve[x.aluno_id].meses.length} meses anteriores`} · {brl(deve[x.aluno_id].tot)} ({deve[x.aluno_id].meses.join(', ')})</small>}</div>
             <div className="seg" role="group" aria-label={`Situação de ${x.alunos.nome}`}>
               {['pago', 'pendente', 'isento'].map((s) => (
@@ -117,11 +121,12 @@ export default async function Mes({ params, searchParams }) {
             )}
           </div>
         ))}
+        </Fragment>))}
         {!vis.length && <div className="row">Ninguém pendente neste mês.</div>}
         {desab.length > 0 && (
           <details className="row desab">
             <summary>Desabilitados neste mês ({desab.length}) · não entram na NF</summary>
-            {desab.map((x) => (
+            {agrupar(desab, turmas, (x) => x.alunos).flatMap((g) => g.itens).map((x) => (
               <form key={x.id} action={A.habilitarNoMes} className="desab-item">
                 <input type="hidden" name="id" value={x.id} />
                 <span>{x.alunos.nome}</span><button className="chip">Habilitar</button>

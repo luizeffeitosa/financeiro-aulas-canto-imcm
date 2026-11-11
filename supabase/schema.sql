@@ -52,3 +52,10 @@ create policy comprovantes_admin_delete on storage.objects for delete to authent
 alter table alunos add column apelido text, add column telefone text;
 -- migration "habilitar_desabilitar_no_mes" (aplicada): status 'desabilitado',
 -- resumo_mes ignora desabilitados, abrir_mes inclui todos os alunos e herda o desabilitado do mês anterior.
+
+-- migration "turmas"
+create table turmas (id serial primary key, nome text not null unique, ordem int not null default 0);
+alter table turmas enable row level security;
+create policy admin_all on turmas for all to authenticated using (is_admin()) with check (is_admin());
+alter table alunos alter column turma drop not null, alter column turma drop default;
+alter table alunos add constraint alunos_turma_fk foreign key (turma) references turmas(id) on delete set null;
