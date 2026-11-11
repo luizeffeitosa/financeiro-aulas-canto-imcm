@@ -47,3 +47,8 @@ create policy comprovantes_admin_select on storage.objects for select to authent
 create policy comprovantes_admin_insert on storage.objects for insert to authenticated with check (bucket_id = 'comprovantes' and public.is_admin());
 create policy comprovantes_admin_update on storage.objects for update to authenticated using (bucket_id = 'comprovantes' and public.is_admin()) with check (bucket_id = 'comprovantes' and public.is_admin());
 create policy comprovantes_admin_delete on storage.objects for delete to authenticated using (bucket_id = 'comprovantes' and public.is_admin());
+
+-- migration "apelido_telefone_afastamento"
+alter table alunos add column apelido text, add column telefone text;
+-- migration "habilitar_desabilitar_no_mes" (pendente de aplicar): status 'desabilitado',
+-- resumo_mes ignora desabilitados, abrir_mes inclui todos os alunos e herda o desabilitado do mês anterior.

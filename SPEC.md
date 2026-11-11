@@ -16,7 +16,7 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 | # | Regra |
 |---|---|
 | R1 | **Competência.** Cada mensalidade pertence a um mês (competência). Pagamento atrasado quita a competência de origem e registra `pago_em` (data real do recebimento). |
-| R2 | **Status** de uma mensalidade: `pendente` (padrão), `pago`, `isento`. |
+| R2 | **Status** de uma mensalidade: `pendente` (padrão), `pago`, `isento`, `desabilitado` (fora da NF). |
 | R3 | **Conta** é obrigatória quando `pago`: `PagSeguro` (conta correta), `Bradesco`, `PicPay`, `Outra`. Fora do PagSeguro é sinalizado no relatório. |
 | R4 | **Isento** entra na NF do João, não paga reembolso; a igreja cobre 100%. Motivo opcional. Isenção é por mês. |
 | R5 | **Parâmetros por mês:** valor da mensalidade (hoje R$ 140) e parcela do aluno (hoje R$ 70). Copiados do mês anterior ao abrir um mês novo. |
@@ -26,9 +26,11 @@ O ministério paga 100% das aulas de canto do professor João Liasch (NF mensal)
 | R9 | **Parcela da igreja** = NF esperada − Recebido dos alunos. |
 | R10 | **Saldo do mês** = Recebido − A receber (≤ 0). **Saldo do ano** = Σ saldos dos meses do ano. |
 | R11 | **Débitos em aberto por pessoa** = Σ competências `pendente` no período filtrado: um mês, um ano (padrão: o ano selecionado) ou todos os anos. Um período não penaliza o outro. Pendências antigas migram como `pendente` e não há cobrança ativa; não existe status de "perdoado". |
-| R12 | **Abrir mês**: cria uma mensalidade `pendente` para cada aluno ativo. Aluno entra/sai da turma ativando/desativando no cadastro; meses já abertos não mudam. |
+| R12 | **Abrir mês**: cria uma mensalidade para cada aluno cadastrado (ver R17). Meses já abertos não mudam. |
 | R14 | **Alerta na visão do mês:** cada aluno com competências anteriores `pendente` mostra quantos meses deve, o total e quais meses. É só informativo. |
 | R15 | **Comprovante** (opcional para marcar pago): só imagem, comprimida no aparelho (≤1600px, JPEG). Guardado no Supabase Storage, bucket privado `comprovantes`, em `AAAA/MM/nome-do-aluno.jpg`. Ao anexar, o mesmo arquivo é ligado aos outros pagamentos do aluno com a mesma data e sem comprovante (um Pix para vários meses). |
+| R16 | **Apelido e WhatsApp** no cadastro do aluno. O botão **Cobrar no WhatsApp** (linhas com o mês pendente e/ou o mês anterior pendente) abre o WhatsApp com a mensagem pronta usando o apelido (ou o primeiro nome); sem telefone, o WhatsApp pede o contato. |
+| R17 | **Habilitar/desabilitar no mês:** todos os alunos cadastrados aparecem em cada mês. Status `desabilitado` = fora da NF e do reembolso (afastado ou saiu). Ao abrir um mês, vem desabilitado quem é inativo no cadastro ou estava desabilitado no mês anterior; os demais vêm pendentes. Desabilitar pede confirmação e não vale para quem já pagou. |
 | R13 | Valor da parcela é guardado na própria mensalidade (permite meia mensalidade, ex. jan/25). |
 
 ## 4. Relatório mensal (PDF)
@@ -39,7 +41,7 @@ Login por e-mail e senha (Supabase Auth); link mágico como alternativa ("esquec
 
 ## 6. Modelo de dados (Postgres/Supabase)
 ```
-alunos        (id, nome, apelidos text[], turma int, ativo bool)
+alunos        (id, nome, apelidos text[], apelido text, telefone text, turma int, ativo bool)
 meses         (competencia date pk, valor_mensalidade numeric null, valor_aluno numeric)
 mensalidades  (id, competencia fk, aluno_id fk, status, valor_aluno numeric,
                conta text null, pago_em date null, motivo text null,

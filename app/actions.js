@@ -56,9 +56,14 @@ export async function addAlunoNoMes(fd) {
   const { data: mes } = await sb.from('meses').select('valor_aluno').eq('competencia', comp).single()
   await ok(sb.from('mensalidades').insert({ competencia: comp, aluno_id: fd.get('aluno_id'), valor_aluno: mes.valor_aluno })); feito()
 }
-export async function removerDoMes(fd) {
+export async function desabilitarNoMes(fd) {
   const sb = await db()
-  await ok(sb.from('mensalidades').delete().eq('id', fd.get('id')).eq('status', 'pendente')); feito()
+  await ok(sb.from('mensalidades').update({ status: 'desabilitado', conta: null, pago_em: null, motivo: null, comprovante: null })
+    .eq('id', fd.get('id')).neq('status', 'pago')); feito()
+}
+export async function habilitarNoMes(fd) {
+  const sb = await db()
+  await ok(sb.from('mensalidades').update({ status: 'pendente' }).eq('id', fd.get('id')).eq('status', 'desabilitado')); feito()
 }
 export async function toggleAluno(fd) {
   const sb = await db()
@@ -76,4 +81,12 @@ export async function salvarComprovante(id, path) {
   if (m.pago_em) await sb.from('mensalidades').update({ comprovante: path })
     .eq('aluno_id', m.aluno_id).eq('pago_em', m.pago_em).eq('status', 'pago').is('comprovante', null)
   feito()
+}
+
+export async function atualizarAluno(fd) {
+  const sb = await db()
+  await ok(sb.from('alunos').update({
+    apelido: fd.get('apelido')?.trim() || null,
+    telefone: fd.get('telefone')?.replace(/\D/g, '') || null,
+  }).eq('id', fd.get('id'))); feito()
 }

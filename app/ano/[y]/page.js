@@ -12,7 +12,7 @@ export default async function Ano({ params, searchParams }) {
   const [{ data: anos }, { data: res }, { data: lanc }, { data: deb }] = await Promise.all([
     sb.from('meses').select('competencia'),
     sb.from('resumo_mes').select('*').gte('competencia', ini).lte('competencia', fim).order('competencia'),
-    sb.from('mensalidades').select('competencia, status, conta, aluno_id, alunos(nome)').gte('competencia', ini).lte('competencia', fim),
+    sb.from('mensalidades').select('competencia, status, conta, aluno_id, alunos(nome)').gte('competencia', ini).lte('competencia', fim).neq('status', 'desabilitado'),
     qDeb,
   ])
   const listaAnos = [...new Set((anos || []).map((x) => x.competencia.slice(0, 4)))].sort()

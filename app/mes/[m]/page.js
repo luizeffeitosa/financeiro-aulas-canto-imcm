@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { db, linksComprovantes } from '@/lib/supabase'
-import { brl, rotulo, curto, slug, CONTAS, proximo, hojeSP } from '@/lib/fmt'
+import { brl, rotulo, curto, slug, CONTAS, proximo, anterior, hojeSP, linkCobranca } from '@/lib/fmt'
 import * as A from '@/app/actions'
-import { AutoForm, Comprovante, SeletorMes } from '@/app/ui'
+import { AutoForm, Comprovante, SeletorMes, DesabilitarNoMes } from '@/app/ui'
 
 export default async function Mes({ params, searchParams }) {
   const { m } = await params, { f } = await searchParams
@@ -12,13 +12,15 @@ export default async function Mes({ params, searchParams }) {
   const [{ data: meses }, { data: r }, { data: lanc }, { data: ajustes }, { data: alunos }, { data: atrasos }] = await Promise.all([
     sb.from('meses').select('competencia').order('competencia'),
     sb.from('resumo_mes').select('*').eq('competencia', comp).maybeSingle(),
-    sb.from('mensalidades').select('*, alunos(nome, turma)').eq('competencia', comp),
+    sb.from('mensalidades').select('*, alunos(nome, turma, apelido, telefone)').eq('competencia', comp),
     sb.from('ajustes').select('*, alunos(nome)').eq('competencia', comp).order('id'),
     sb.from('alunos').select('id, nome').eq('ativo', true).order('nome'),
     sb.from('mensalidades').select('aluno_id, competencia, valor_aluno').eq('status', 'pendente').lt('competencia', comp).order('competencia'),
   ])
   // débitos de meses anteriores por aluno (alerta na lista)
   const deve = {}
+  const antComp = `${anterior(m)}-01`
+  const deveAnterior = new Set((atrasos || []).filter((d) => d.competencia === antComp).map((d) => d.aluno_id))
   ;(atrasos || []).forEach((d) => { const x = (deve[d.aluno_id] ??= { meses: [], tot: 0 }); x.meses.push(curto(d.competencia.slice(0, 7))); x.tot += Number(d.valor_aluno) })
   const lista = (meses || []).map((x) => x.competencia.slice(0, 7))
   const ultimo = lista.at(-1)
@@ -33,7 +35,9 @@ export default async function Mes({ params, searchParams }) {
       </div>
     )
   }
-  const rows = (lanc || []).sort((a, b) => a.alunos.turma - b.alunos.turma || a.alunos.nome.localeCompare(b.alunos.nome))
+  const todos = (lanc || []).sort((a, b) => a.alunos.turma - b.alunos.turma || a.alunos.nome.localeCompare(b.alunos.nome))
+  const rows = todos.filter((x) => x.status !== 'desabilitado')
+  const desab = todos.filter((x) => x.status === 'desabilitado')
   const vis = f === 'pend' ? rows.filter((x) => x.status === 'pendente') : rows
   const pend = rows.filter((x) => x.status === 'pendente').length
   const links = await linksComprovantes(sb, rows.map((x) => x.comprovante))
@@ -100,14 +104,27 @@ export default async function Mes({ params, searchParams }) {
                 </AutoForm>
               </div>
             )}
-            {x.status === 'pendente' && m === ultimo && (
+            {(x.status === 'pendente' || deveAnterior.has(x.aluno_id)) && (
               <div className="detail">
-                <form action={A.removerDoMes} className="inline"><input type="hidden" name="id" value={x.id} /><button className="link">Não fez aula este mês</button></form>
+                <a className="chip wa" target="_blank" rel="noreferrer"
+                  href={linkCobranca(x.alunos, m, hoje, x.status === 'pendente', deveAnterior.has(x.aluno_id))}>Cobrar no WhatsApp</a>
+                {x.status !== 'pago' && <DesabilitarNoMes id={x.id} nome={x.alunos.apelido || x.alunos.nome.split(' ')[0]} mes={rotulo(m)} acao={A.desabilitarNoMes} />}
               </div>
             )}
           </div>
         ))}
         {!vis.length && <div className="row">Ninguém pendente neste mês.</div>}
+        {desab.length > 0 && (
+          <details className="row desab">
+            <summary>Desabilitados neste mês ({desab.length}) · não entram na NF</summary>
+            {desab.map((x) => (
+              <form key={x.id} action={A.habilitarNoMes} className="desab-item">
+                <input type="hidden" name="id" value={x.id} />
+                <span>{x.alunos.nome}</span><button className="chip">Habilitar</button>
+              </form>
+            ))}
+          </details>
+        )}
         {semMes.length > 0 && (
           <form action={A.addAlunoNoMes} className="row">
             <div className="detail">

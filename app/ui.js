@@ -103,3 +103,17 @@ export function SeletorMes({ atual, meses, hoje }) {
     </div>
   )
 }
+
+// desabilitar o aluno no mês (afastado / não fez aula): pede confirmação antes
+export function DesabilitarNoMes({ id, nome, mes, acao }) {
+  const [conf, setConf] = useState(false)
+  if (!conf) return <button type="button" className="link" onClick={() => setConf(true)}>Desabilitar neste mês</button>
+  return (
+    <form action={acao} className="inline confirma">
+      <input type="hidden" name="id" value={id} />
+      <span>Desabilitar {nome} em {mes}? Não entra na NF nem no reembolso, e segue desabilitado nos próximos meses até ser habilitado.</span>
+      <button className="chip flag">Confirmar</button>
+      <button type="button" className="link" onClick={() => setConf(false)}>Cancelar</button>
+    </form>
+  )
+}
