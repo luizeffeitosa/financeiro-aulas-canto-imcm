@@ -50,5 +50,5 @@ create policy comprovantes_admin_delete on storage.objects for delete to authent
 
 -- migration "apelido_telefone_afastamento"
 alter table alunos add column apelido text, add column telefone text;
--- migration "habilitar_desabilitar_no_mes" (pendente de aplicar): status 'desabilitado',
+-- migration "habilitar_desabilitar_no_mes" (aplicada): status 'desabilitado',
 -- resumo_mes ignora desabilitados, abrir_mes inclui todos os alunos e herda o desabilitado do mês anterior.
